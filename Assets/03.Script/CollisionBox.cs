@@ -5,32 +5,24 @@ using UnityEngine;
 [RequireComponent(typeof(Collider))]
 public class CollisionBox : MonoBehaviour
 {
+    [SerializeField] GameManager.BallColor currentState;
     [SerializeField] private int count = 0;
     [SerializeField] private TextMeshProUGUI textMeshProUGUI_Count;
     [SerializeField] private Renderer render;
+    private GameManager.BallColor CurrentState => currentState;
 
-    private HashSet<Ball> instantiateBall = new HashSet<Ball>();
+    private HashSet<GameObject> instantiateBall  = new HashSet<GameObject>();
 
     public void Setup()
     {
         textMeshProUGUI_Count.text = $"{count} X";
     }
 
-    
-    public void AddBall(Ball _ball)
-    {
-        if (instantiateBall.Contains(_ball))
-            return;
-
-        instantiateBall.Add(_ball);
-    }
-
-
-    public bool CheckDuplicate(Ball _ball) => instantiateBall.Contains(_ball);
-
-
     private void OnTriggerEnter(Collider other)
     {
+        if (instantiateBall.Contains(other.gameObject))
+            return;
+
 
     }
 

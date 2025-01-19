@@ -1,31 +1,14 @@
 using System.Collections;
 using UnityEngine;
 
+
 public class Ball : MonoBehaviour
 {
+    [SerializeField] private MeshRenderer meshRenderer;
+    [SerializeField] private Rigidbody rig;
 
-    private void OnTriggerEnter(Collider other)
+    private void Awake()
     {
-        if (other.gameObject.TryGetComponent<CollisionBox>(out CollisionBox range))
-        {
-            if (!range.CheckDuplicate(this))
-                StartCoroutine(CoCreateBall(range));
-        }
+        
     }
-
-
-
-    private IEnumerator CoCreateBall(CollisionBox range)
-    {
-    //    for (int i = 0; i < range.Count; i++)
-    //    {
-    //        Ball newBall = Instantiate<Ball>(this);
-    //        range.AddBall(newBall);
-
-            yield return new WaitForSeconds(0.1f);
-    //    }
-
-    //    Destroy(this.gameObject);
-    }
-
 }
