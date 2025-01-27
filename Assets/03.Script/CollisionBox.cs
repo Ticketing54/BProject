@@ -5,11 +5,11 @@ using UnityEngine;
 [RequireComponent(typeof(Collider))]
 public class CollisionBox : MonoBehaviour
 {
-    [SerializeField] GameManager.BallColor currentState;
+    ///[SerializeField] GameManager.BallColor currentState;
     [SerializeField] private int count = 0;
     [SerializeField] private TextMeshProUGUI textMeshProUGUI_Count;
     [SerializeField] private Renderer render;
-    private GameManager.BallColor CurrentState => currentState;
+    //private GameManager.BallColor CurrentState => currentState;
 
     private HashSet<GameObject> instantiateBall  = new HashSet<GameObject>();
 
