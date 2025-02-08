@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Pool;
@@ -30,64 +31,84 @@ public class GameManager : MonoBehaviour
     }
 
     [SerializeField] private Material ballMaterial;
-    [SerializeField] private Ball ballPrefab;
+    [SerializeField] private GameObject ballPrefab;
 
     private BallColor ballColor = BallColor.RED;
     public BallColor CurrentBallColor => ballColor;
 
-    private Dictionary<GameObject, CollisionBox> createBox;
 
-    private ObjectPool<Ball> ballPool;
+    public CinemachineTargetGroup group;
 
-    private Ball temp;
+    public static Action ClickEvent;
 
     private void Awake()
     {
-        ballPool = new ObjectPool<Ball>(Pool_Create, Pool_Get, BallPool_Release, BallPool_Destroy, true, 10);
-
-
+        //ballPool = new ObjectPool<GameObject>(Pool_Create, null, BallPool_Release, null, true, 10, 10);
+        
     }
 
+    private void OnEnable()
+    {
+        ClickEvent += ChangeBallColor;
+    }
+
+    private void OnDisable()
+    {
+        ClickEvent -= ChangeBallColor;
+    }
+
+    private void ChangeBallColor()
+    {
+        ballColor= ballColor == BallColor.RED ? BallColor.BLUE : BallColor.RED;
+    }
 
     private void Update()
     {
-        if(Input.GetKeyDown(KeyCode.A))
+        if (Input.GetKeyDown(KeyCode.A))
         {
-            temp = ballPool.Get();
-        }
-
-        if (Input.GetKeyDown(KeyCode.B))
-        {
-            ballPool.Release(temp);
+            CreateBall(new Vector3(0, 55, 0));
         }
     }
+
     #region BallPool
 
-    private Ball Pool_Create() => Instantiate<Ball>(ballPrefab);
+    private GameObject Pool_Create() => Instantiate<GameObject>(ballPrefab);
 
-    private void Pool_Get(Ball _ball)
+    private void BallPool_Release(GameObject _ball)
     {
-        Debug.Log("Get");
-    }
+        if(group.FindMember(_ball.transform) == -1)
+            group.RemoveMember(_ball.transform);
 
-    private void BallPool_Release(Ball _ball)
-    {
-        Debug.Log("Release");
-    }
+        _ball.gameObject.SetActive(false);
 
-    private void BallPool_Destroy(Ball _ball)
-    {
-        Debug.Log("Destroy");
+        //Debug.Log("Release");
     }
 
     #endregion
 
-    public void CreateBall(GameObject _obj, CollisionBox _createBox)
+    public void CreateBall(Vector3 _position, Action<GameObject> _applyCollisionBox = null)
     {
+        //if (ballPool == null)
+        //    return ;
 
+        GameObject ball = Pool_Create(); //ballPool.Get();
+
+        _applyCollisionBox?.Invoke(ball);
+
+        ball.transform.position = _position;
+
+        if (group.FindMember(ball.transform) == -1)
+            group.AddMember(ball.transform,1,1);
     }
 
+    public void ReleaseBall(GameObject _ball)
+    {
+        //if (ballPool == null)
+        //    return;
 
-    
+        Destroy(_ball);
+
+        //ballPool.Release(_ball);
+    }
 
 }
