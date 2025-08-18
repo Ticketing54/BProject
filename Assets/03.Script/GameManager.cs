@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Unity.Cinemachine;
 using UnityEngine;
@@ -41,11 +42,6 @@ public class GameManager : MonoBehaviour
 
     public static Action ClickEvent;
 
-    private void Awake()
-    {
-        //ballPool = new ObjectPool<GameObject>(Pool_Create, null, BallPool_Release, null, true, 10, 10);
-        
-    }
 
     private void OnEnable()
     {
@@ -62,53 +58,38 @@ public class GameManager : MonoBehaviour
         ballColor= ballColor == BallColor.RED ? BallColor.BLUE : BallColor.RED;
     }
 
-    private void Update()
+
+    public void ReplicateBall(Vector3 _position, int _count, Action<GameObject> _applyCollisionBox = null)
     {
-        if (Input.GetKeyDown(KeyCode.A))
+        StartCoroutine(CoReplicateBall(_position, _count, _applyCollisionBox));
+    }
+
+    private IEnumerator CoReplicateBall(Vector3 _position, int _count, Action<GameObject> _applyCollisionBox = null)
+    {
+        WaitForSeconds fixedUpdate = new WaitForSeconds(0.1f);
+
+        for (int i = 0; i < _count; i++)
         {
-            CreateBall(new Vector3(0, 55, 0));
+            GameObject ball = Instantiate<GameObject>(ballPrefab);
+
+            _applyCollisionBox?.Invoke(ball);
+
+            Vector3 offset = UnityEngine.Random.insideUnitSphere * 0.35f +_position;
+            offset.y = _position.y;
+
+            ball.transform.position = offset;
+
+            if (group.FindMember(ball.transform) == -1)
+                group.AddMember(ball.transform, 1, 1);
+
+
+            if (ball.TryGetComponent<Rigidbody>(out Rigidbody rig))
+            {
+                rig.angularVelocity = Vector3.zero;
+            }
+
+
+            yield return fixedUpdate;
         }
     }
-
-    #region BallPool
-
-    private GameObject Pool_Create() => Instantiate<GameObject>(ballPrefab);
-
-    private void BallPool_Release(GameObject _ball)
-    {
-        if(group.FindMember(_ball.transform) == -1)
-            group.RemoveMember(_ball.transform);
-
-        _ball.gameObject.SetActive(false);
-
-        //Debug.Log("Release");
-    }
-
-    #endregion
-
-    public void CreateBall(Vector3 _position, Action<GameObject> _applyCollisionBox = null)
-    {
-        //if (ballPool == null)
-        //    return ;
-
-        GameObject ball = Pool_Create(); //ballPool.Get();
-
-        _applyCollisionBox?.Invoke(ball);
-
-        ball.transform.position = _position;
-
-        if (group.FindMember(ball.transform) == -1)
-            group.AddMember(ball.transform,1,1);
-    }
-
-    public void ReleaseBall(GameObject _ball)
-    {
-        //if (ballPool == null)
-        //    return;
-
-        Destroy(_ball);
-
-        //ballPool.Release(_ball);
-    }
-
 }

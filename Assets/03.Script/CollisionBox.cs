@@ -2,34 +2,19 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class CollisionBox : MonoBehaviour
 {
     [SerializeField] private int count = 0;
     [SerializeField] private TextMeshProUGUI textMeshProUGUI_Count;
-    [SerializeField] private Renderer render;
-
     [SerializeField] private BallColor currentState;
+
+    private  WaitForSeconds delayReplicateTime = new WaitForSeconds(0.1f);
+
     private BallColor CurrentState => currentState;
 
     private HashSet<GameObject> collisionData = new HashSet<GameObject>();
-
-    private void OnEnable()
-    {
-        GameManager.ClickEvent += ChangeState;
-    }
-
-    private void OnDisable()
-    {
-        GameManager.ClickEvent -= ChangeState;
-    }
-
-
-
-    private void ChangeState()
-    {
-
-    }
 
     public void Setup()
     {
@@ -41,14 +26,39 @@ public class CollisionBox : MonoBehaviour
         if (collisionData.Contains(other.gameObject))
             return;
 
-        GameManager.Instance.ReleaseBall(other.gameObject);
 
-        if(CurrentState == GameManager.Instance.CurrentBallColor)
+        StartCoroutine(CoReplicateBall(other.gameObject));
+
+    }
+    
+    private IEnumerator CoReplicateBall(GameObject _ball)
+    {
+        collisionData.Add(_ball);
+
+        _ball.TryGetComponent<Rigidbody>(out Rigidbody rigidbody);
+
+        Vector3 originLinear = rigidbody?.linearVelocity ?? Vector3.zero;
+        Vector3 originAngular = rigidbody?.angularVelocity ?? Vector3.zero;
+
+
+        for (int i = 0; i < count; i++)
         {
-            StartCoroutine(CoCollision(other.transform.position));
+            GameObject ball = Instantiate<GameObject>(_ball);
+            collisionData.Add(ball);
+
+            ball.transform.position = _ball.transform.position;
+
+            if (ball.TryGetComponent<Rigidbody>(out Rigidbody rig))
+            {
+                rig.angularVelocity = originAngular;
+                rig.linearVelocity = originLinear;
+            }
+
+            yield return delayReplicateTime;
         }
 
     }
+
 
     private void AddCollisionBox(GameObject _obj)
     {
@@ -57,25 +67,4 @@ public class CollisionBox : MonoBehaviour
 
         collisionData.Add(_obj);
     }
-
-    private IEnumerator CoCollision(Vector3 _position)
-    {
-        for (int i = 0; i < count; i++)
-        {
-            yield return new WaitForSeconds(0.01f);
-
-            GameManager.Instance.CreateBall(_position, AddCollisionBox);
-        }
-    }
-
-
-
-    private void OnValidate()
-    {
-        if (textMeshProUGUI_Count == null || render == null)
-            return;
-
-        Setup();
-    }
-
 }
