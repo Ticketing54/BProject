@@ -14,6 +14,7 @@ public class CollisionBox : MonoBehaviour
 
     private BallColor CurrentState => currentState;
 
+
     private HashSet<GameObject> collisionData = new HashSet<GameObject>();
 
     public void Setup()
@@ -26,9 +27,7 @@ public class CollisionBox : MonoBehaviour
         if (collisionData.Contains(other.gameObject))
             return;
 
-
         StartCoroutine(CoReplicateBall(other.gameObject));
-
     }
     
     private IEnumerator CoReplicateBall(GameObject _ball)
@@ -56,15 +55,5 @@ public class CollisionBox : MonoBehaviour
 
             yield return delayReplicateTime;
         }
-
-    }
-
-
-    private void AddCollisionBox(GameObject _obj)
-    {
-        if (collisionData.Contains(_obj))
-            return;
-
-        collisionData.Add(_obj);
     }
 }

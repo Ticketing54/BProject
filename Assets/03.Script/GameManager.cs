@@ -58,38 +58,4 @@ public class GameManager : MonoBehaviour
         ballColor= ballColor == BallColor.RED ? BallColor.BLUE : BallColor.RED;
     }
 
-
-    public void ReplicateBall(Vector3 _position, int _count, Action<GameObject> _applyCollisionBox = null)
-    {
-        StartCoroutine(CoReplicateBall(_position, _count, _applyCollisionBox));
-    }
-
-    private IEnumerator CoReplicateBall(Vector3 _position, int _count, Action<GameObject> _applyCollisionBox = null)
-    {
-        WaitForSeconds fixedUpdate = new WaitForSeconds(0.1f);
-
-        for (int i = 0; i < _count; i++)
-        {
-            GameObject ball = Instantiate<GameObject>(ballPrefab);
-
-            _applyCollisionBox?.Invoke(ball);
-
-            Vector3 offset = UnityEngine.Random.insideUnitSphere * 0.35f +_position;
-            offset.y = _position.y;
-
-            ball.transform.position = offset;
-
-            if (group.FindMember(ball.transform) == -1)
-                group.AddMember(ball.transform, 1, 1);
-
-
-            if (ball.TryGetComponent<Rigidbody>(out Rigidbody rig))
-            {
-                rig.angularVelocity = Vector3.zero;
-            }
-
-
-            yield return fixedUpdate;
-        }
-    }
 }
