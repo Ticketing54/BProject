@@ -34,8 +34,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Material ballMaterial;
     [SerializeField] private GameObject ballPrefab;
 
-    private BallColor ballColor = BallColor.RED;
-    public BallColor CurrentBallColor => ballColor;
+    private static BallColor ballColor = BallColor.RED;
+    public static BallColor CurrentBallColor => ballColor;
 
 
     public CinemachineTargetGroup group;

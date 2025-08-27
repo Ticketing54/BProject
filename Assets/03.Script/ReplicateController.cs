@@ -1,36 +1,36 @@
 using System.Collections;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
-using UnityEngine.UIElements;
 
-public class CollisionBox : MonoBehaviour
+public class ReplicateController : MonoBehaviour
 {
-    [SerializeField] private int count = 0;
-    [SerializeField] private TextMeshProUGUI textMeshProUGUI_Count;
-    [SerializeField] private BallColor currentState;
-
-    private  WaitForSeconds delayReplicateTime = new WaitForSeconds(0.1f);
-
-    private BallColor CurrentState => currentState;
-
+    [SerializeField] private List<ReplicateBox> replicateBox_List;
 
     private HashSet<GameObject> collisionData = new HashSet<GameObject>();
+    private static WaitForSeconds delayReplicateTime = new WaitForSeconds(0.1f);
 
-    public void Setup()
+    private void Awake()
     {
-        textMeshProUGUI_Count.text = $"{count} X";
+        Setup();
     }
 
-    private void OnTriggerExit(Collider other)
+    private void Setup()
     {
-        if (collisionData.Contains(other.gameObject))
+        foreach(ReplicateBox box in replicateBox_List)
+        {
+            box.ReplicateBall = ReplicateBall;
+        }
+    }
+
+    private void ReplicateBall(GameObject _ball, int _count)
+    {
+        if (collisionData.Contains(_ball))
             return;
 
-        StartCoroutine(CoReplicateBall(other.gameObject));
+        StartCoroutine(CoReplicateBall(_ball,_count));
     }
-    
-    private IEnumerator CoReplicateBall(GameObject _ball)
+
+    private IEnumerator CoReplicateBall(GameObject _ball, int _count)
     {
         collisionData.Add(_ball);
 
@@ -40,7 +40,7 @@ public class CollisionBox : MonoBehaviour
         Vector3 originAngular = rigidbody?.angularVelocity ?? Vector3.zero;
 
 
-        for (int i = 0; i < count; i++)
+        for (int i = 0; i < _count; i++)
         {
             GameObject ball = Instantiate<GameObject>(_ball);
             collisionData.Add(ball);
@@ -56,4 +56,5 @@ public class CollisionBox : MonoBehaviour
             yield return delayReplicateTime;
         }
     }
+
 }
