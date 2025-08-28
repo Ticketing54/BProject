@@ -20,6 +20,7 @@ public class ReplicateController : MonoBehaviour
         {
             box.ReplicateBall = ReplicateBall;
         }
+
     }
 
     private void ReplicateBall(GameObject _ball, int _count)
@@ -56,5 +57,63 @@ public class ReplicateController : MonoBehaviour
             yield return delayReplicateTime;
         }
     }
+
+
+#if UNITY_EDITOR
+    [Header("[Editor]")]
+    [SerializeField] private ReplicateBox leftBox;
+    [SerializeField] private ReplicateBox rightBox;
+    [Range(0,1)][SerializeField] private float ratio;
+    [SerializeField] private bool isMove = false;
+
+
+    private Transform BoddyTransform => this.transform;
+
+    private void OnValidate()
+    {
+        UpdatePositionAndScale();
+    }
+
+    private void UpdatePositionAndScale()
+    {
+        if (BoddyTransform == null)
+            return;
+
+        if(leftBox!= null)
+        {
+            Vector3 leftBoxPosition = BoddyTransform.position;
+            leftBoxPosition.x = BoddyTransform.position.x - BoddyTransform.lossyScale.x * 0.5f +
+                BoddyTransform.lossyScale.x * ratio * 0.5f;
+
+            Vector3 leftBoxLocalScale = 
+                new Vector3(ratio, BoddyTransform.lossyScale.y, 1);
+
+            leftBox.transform.position = leftBoxPosition;
+            leftBox.transform.localScale = leftBoxLocalScale;
+            
+        }
+
+        
+        if (rightBox != null)
+        {
+            Vector3 rightBoxPosition = BoddyTransform.position;
+            rightBoxPosition.x = BoddyTransform.position.x + BoddyTransform.lossyScale.x * 0.5f -
+                BoddyTransform.transform.lossyScale.x * (1 - ratio) * 0.5f;
+
+            Vector3 rightBoxLocalScale = 
+                new Vector3(1 - ratio, BoddyTransform.lossyScale.y, 1);
+
+            rightBox.transform.position = rightBoxPosition;
+            rightBox.transform.localScale = rightBoxLocalScale;
+        }
+
+        if(isMove)
+        {
+
+        }
+
+    }
+
+#endif
 
 }
