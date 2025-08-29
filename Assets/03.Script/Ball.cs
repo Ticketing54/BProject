@@ -9,6 +9,12 @@ public class Ball : MonoBehaviour
 
     private void Awake()
     {
-        
+        GameManager.Instance.AddAliveBall(this);
     }
+
+    private void OnDestroy()
+    {
+        GameManager.Instance.RemoveAlliveBall(this);
+    }
+
 }
