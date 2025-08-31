@@ -39,8 +39,7 @@ public class GameManager : MonoBehaviour
     public CinemachineTargetGroup group;
 
     public static Action ClickEvent;
-    public Ball LowestBall { get; private set; }
-
+    public static Action<Transform> cameraTargetUpdate;
 
     private void OnEnable()
     {
@@ -58,30 +57,30 @@ public class GameManager : MonoBehaviour
     {
         if (!aliveBall.Contains(_ball))
             aliveBall.Add(_ball);
-
-        FindLowestBall();
     }
 
     public void RemoveAlliveBall(Ball _ball)
     {
         if (aliveBall.Contains(_ball))
             aliveBall.Remove(_ball);
-
-        FindLowestBall();
     }
 
-    private void FindLowestBall()
+    public Transform FindLowestBall()
     {
         List<Ball> ballList = new List<Ball>(aliveBall);
+
+        Ball lowestBall = ballList.Count == 0 ? null : ballList[0];
 
         foreach(Ball ball in ballList)
         {
             if (ball == null)
                 continue;
 
-            if (LowestBall.transform.position.y > ball.transform.position.y)
-                LowestBall = ball;
+            if (lowestBall.transform.position.y > ball.transform.position.y)
+                lowestBall = ball;
         }
+
+        return lowestBall.transform;
     }
 
     private void ChangeBallColor()
