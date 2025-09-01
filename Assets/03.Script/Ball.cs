@@ -7,14 +7,13 @@ public class Ball : MonoBehaviour
     [SerializeField] private MeshRenderer meshRenderer;
     [SerializeField] private Rigidbody rig;
 
-    private void Awake()
+    private void OnEnable()
     {
         GameManager.Instance.AddAliveBall(this);
     }
 
-    private void OnDestroy()
+    private void OnDisable()
     {
         GameManager.Instance.RemoveAlliveBall(this);
     }
-
 }

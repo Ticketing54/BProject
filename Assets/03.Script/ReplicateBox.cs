@@ -1,16 +1,13 @@
-using System.Collections;
-using System.Collections.Generic;
+using System;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UIElements;
-using System;
 public class ReplicateBox : MonoBehaviour
 {
     [SerializeField] private int count = 0;
     [SerializeField] private TextMeshProUGUI textMeshProUGUI_Count;
     [SerializeField] private BallColor currentState;
 
-    public Action<GameObject,int> ReplicateBall;
+    public Action<GameObject, int> ReplicateBall;
 
     private void Awake()
     {
@@ -36,4 +33,12 @@ public class ReplicateBox : MonoBehaviour
 
         ReplicateBall?.Invoke(other.gameObject, count);
     }
+
+#if UNITY_EDITOR
+    private void OnValidate()
+    {
+        textMeshProUGUI_Count.text = $"X{count}";
+    }
+
+#endif
 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Unity.Cinemachine;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public enum BallColor
 {
@@ -21,7 +22,12 @@ public class GameManager : MonoBehaviour
                 instance = FindAnyObjectByType<GameManager>();
 
                 if (instance == null)
-                    instance = new GameManager();
+                {
+                    GameObject gameManager = new GameObject("GameManager");
+                    instance = gameManager.AddComponent<GameManager>();
+                }
+
+                    
             }
 
             return instance;
@@ -30,13 +36,12 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] private Material ballMaterial;
     [SerializeField] private GameObject ballPrefab;
+    [SerializeField] private InputActionReference inputAction;
 
     private static BallColor ballColor = BallColor.RED;
     public static BallColor CurrentBallColor => ballColor;
 
     public HashSet<Ball> aliveBall = new HashSet<Ball>();
-
-    public CinemachineTargetGroup group;
 
     public static Action ClickEvent;
     public static Action<Transform> cameraTargetUpdate;

@@ -1,4 +1,5 @@
 {
+    "version": 1,
     "name": "InputSystem_Actions",
     "maps": [
         {
@@ -986,6 +987,45 @@
                     "processors": "",
                     "groups": "XR",
                     "action": "TrackedDeviceOrientation",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "ChangeAndDrop",
+            "id": "83b58b67-23aa-4dfa-abea-edd4a22e5203",
+            "actions": [
+                {
+                    "name": "ActionInput",
+                    "type": "Button",
+                    "id": "394b841e-5456-4532-bc78-6e8e83043f01",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "911109a5-c9e1-4d71-a8b7-e8d48722f283",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ActionInput",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "3c23f607-f17c-49fd-aa86-9e799f0d47a1",
+                    "path": "<Touchscreen>/Press",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ActionInput",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

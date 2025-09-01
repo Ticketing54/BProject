@@ -1,5 +1,4 @@
 using Unity.Cinemachine;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class CameraManager : MonoBehaviour
@@ -7,11 +6,6 @@ public class CameraManager : MonoBehaviour
     [SerializeField] private CinemachineCamera cinemachineCamera;
 
     private void Awake()
-    {
-        
-    }
-
-    private void OnDestroy()
     {
         
     }
