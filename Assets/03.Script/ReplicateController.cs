@@ -56,6 +56,9 @@ public class ReplicateController : MonoBehaviour
 
             yield return delayReplicateTime;
         }
+        
+
+        GameObject.Destroy(_ball);
     }
 
 

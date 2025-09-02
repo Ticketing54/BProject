@@ -7,12 +7,13 @@ public class ReplicateBox : MonoBehaviour
     [SerializeField] private TextMeshProUGUI textMeshProUGUI_Count;
     [SerializeField] private BallColor currentState;
 
+    private static readonly Color BlueAlpha     = new Color(0f, 0f, 1f, 0.49f);
+    private static readonly Color OrangeAlpha   = new Color(1f, 0.48f, 0f, 0.49f);
+
     public Action<GameObject, int> ReplicateBall;
 
     private void Awake()
     {
-        textMeshProUGUI_Count.text = $"{count} X";
-
         GameManager.ClickEvent += ConvertColor;
     }
 
@@ -29,7 +30,10 @@ public class ReplicateBox : MonoBehaviour
     private void OnTriggerExit(Collider other)
     {
         if (GameManager.CurrentBallColor != currentState)
+        {
             GameObject.Destroy(other.gameObject);
+            return;
+        }
 
         ReplicateBall?.Invoke(other.gameObject, count);
     }

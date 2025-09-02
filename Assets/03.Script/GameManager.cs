@@ -52,8 +52,7 @@ public class GameManager : MonoBehaviour
 
     private static readonly Color Blue = new Color(0f, 0f, 1f, 1f);
     private static readonly Color Orange = new Color(1f, 0.48f, 0f, 1f);
-    private static readonly Color BlueAlpha = new Color(0f, 0f, 1f, 0.49f);
-    private static readonly Color OrangeAlpha = new Color(1f, 0.48f, 0f, 0.49f);
+    
 
     private void OnEnable()
     {
