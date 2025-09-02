@@ -23,7 +23,7 @@ public class ReplicateBox : MonoBehaviour
 
     private void ConvertColor()
     {
-        currentState = currentState != BallColor.RED ? BallColor.RED : BallColor.BLUE;
+        currentState = currentState != BallColor.ORANGE ? BallColor.ORANGE : BallColor.BLUE;
     }
 
     private void OnTriggerExit(Collider other)
