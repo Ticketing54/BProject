@@ -3,33 +3,38 @@ using TMPro;
 using UnityEngine;
 public class ReplicateBox : MonoBehaviour
 {
-    [SerializeField] private int count = 0;
-    [SerializeField] private TextMeshProUGUI textMeshProUGUI_Count;
-    [SerializeField] private BallColor currentState;
-
     private static readonly Color BlueAlpha     = new Color(0f, 0f, 1f, 0.49f);
     private static readonly Color OrangeAlpha   = new Color(1f, 0.48f, 0f, 0.49f);
 
+    [SerializeField] private GameObject cone;
+    [SerializeField] private TextMeshProUGUI textMeshProUGUI_Count;
+    [SerializeField] private MeshRenderer meshRenderer;
+
+    [HideInInspector] public int count = 0;
+    [HideInInspector] public BallColor targetState;
+
     public Action<GameObject, int> ReplicateBall;
 
-    private void Awake()
+
+    private void OnEnable()
     {
-        GameManager.ClickEvent += ConvertColor;
+        GameManager.ClickEvent += UpdateConeState;
+        UpdateConeState();
     }
 
-    private void OnDestroy()
+    private void OnDisable()
     {
-        GameManager.ClickEvent -= ConvertColor;
+        GameManager.ClickEvent -= UpdateConeState;
     }
 
-    private void ConvertColor()
+    private void UpdateConeState()
     {
-        currentState = currentState != BallColor.ORANGE ? BallColor.ORANGE : BallColor.BLUE;
+        cone.SetActive(GameManager.CurrentBallColor == targetState);
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (GameManager.CurrentBallColor != currentState)
+        if (GameManager.CurrentBallColor != targetState)
         {
             GameObject.Destroy(other.gameObject);
             return;
@@ -39,9 +44,20 @@ public class ReplicateBox : MonoBehaviour
     }
 
 #if UNITY_EDITOR
-    private void OnValidate()
+    [SerializeField] private Material blueMaterial;
+    [SerializeField] private Material orangeMaterial;
+    
+    public void IsEnable(bool _isEnable)
+    {
+        textMeshProUGUI_Count.gameObject.SetActive(_isEnable);
+        gameObject.SetActive(_isEnable);
+    }
+
+    public void UpdateData(Vector3 _position,Material _material)
     {
         textMeshProUGUI_Count.text = $"X{count}";
+        textMeshProUGUI_Count.transform.position = _position - transform.forward;
+        meshRenderer.material = _material;
     }
 
 #endif

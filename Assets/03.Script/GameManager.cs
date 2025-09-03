@@ -35,9 +35,6 @@ public class GameManager : MonoBehaviour
     }
 
     [SerializeField] private Material ball_Material;
-    [SerializeField] private Material replicate_Original;
-    [SerializeField] private Material replicate_Inverted;
-
     [SerializeField] private GameObject ballPrefab;
     [SerializeField] private InputActionReference inputAction;
 

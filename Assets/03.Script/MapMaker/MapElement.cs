@@ -4,11 +4,9 @@ public class MapElement : MonoBehaviour
 {
     public enum MapMakerElementType
     {
-        WALL = 1,        
-        SLANTEDWALL,
-        START_POSITION,
-        MIDDLEP_OSITION,
-        END_POSITION,
+        WALL=1,
+        SLANTEDWALL ,
+        MIDDLE_POSITION,
         REPLICATE,
         NONE = 0,
     }

@@ -4,7 +4,24 @@ using UnityEngine;
 
 public class ReplicateController : MonoBehaviour
 {
-    [SerializeField] private List<ReplicateBox> replicateBox_List;
+    [System.Serializable]
+    private class BoxData
+    {
+        public BallColor color;
+        public int count;
+        public ReplicateBox targetBox;
+        public bool isEnable = true;
+    }
+
+    [Header("LeftBox")]
+    [SerializeField] private BoxData leftBoxData;
+
+    [Header("RightBox")]
+    [SerializeField] private BoxData rightBoxData;
+
+    [Header("Ect")]
+    [SerializeField] private Material blueMaterial;
+    [SerializeField] private Material orangeMaterial;
 
     private HashSet<GameObject> collisionData = new HashSet<GameObject>();
     private static WaitForSeconds delayReplicateTime = new WaitForSeconds(0.1f);
@@ -16,11 +33,11 @@ public class ReplicateController : MonoBehaviour
 
     private void Setup()
     {
-        foreach(ReplicateBox box in replicateBox_List)
-        {
-            box.ReplicateBall = ReplicateBall;
-        }
+        if (leftBoxData.targetBox != null)
+            leftBoxData.targetBox.ReplicateBall = ReplicateBall;
 
+        if (rightBoxData.targetBox != null)
+            rightBoxData.targetBox.ReplicateBall = ReplicateBall;
     }
 
     private void ReplicateBall(GameObject _ball, int _count)
@@ -63,9 +80,6 @@ public class ReplicateController : MonoBehaviour
 
 
 #if UNITY_EDITOR
-    [Header("[Editor]")]
-    [SerializeField] private ReplicateBox leftBox;
-    [SerializeField] private ReplicateBox rightBox;
     [Range(0,1)][SerializeField] private float ratio;
     [SerializeField] private bool isMove = false;
 
@@ -77,37 +91,57 @@ public class ReplicateController : MonoBehaviour
         UpdatePositionAndScale();
     }
 
+    private Material GetReplicateMaterial(BallColor _color)
+    {
+        return _color == BallColor.ORANGE ? orangeMaterial : blueMaterial;
+    }
+
     private void UpdatePositionAndScale()
     {
         if (BoddyTransform == null)
             return;
 
-        if(leftBox!= null)
+        if (leftBoxData.targetBox != null)
         {
+            ReplicateBox replicateLeftBox = leftBoxData.targetBox;
+
             Vector3 leftBoxPosition = BoddyTransform.position;
             leftBoxPosition.x = BoddyTransform.position.x - BoddyTransform.lossyScale.x * 0.5f +
                 BoddyTransform.lossyScale.x * ratio * 0.5f;
 
-            Vector3 leftBoxLocalScale = 
+            Vector3 leftBoxLocalScale =
                 new Vector3(ratio, BoddyTransform.lossyScale.y, 1);
 
-            leftBox.transform.position = leftBoxPosition;
-            leftBox.transform.localScale = leftBoxLocalScale;
-            
+            replicateLeftBox.transform.position = leftBoxPosition;
+            replicateLeftBox.transform.localScale = leftBoxLocalScale;
+
+            replicateLeftBox.targetState = leftBoxData.color;
+            replicateLeftBox.count = leftBoxData.count;
+
+            replicateLeftBox.IsEnable(leftBoxData.isEnable);
+            replicateLeftBox.UpdateData(replicateLeftBox.transform.position, GetReplicateMaterial(replicateLeftBox.targetState));
+
         }
 
-        
-        if (rightBox != null)
+        if (rightBoxData.targetBox != null)
         {
+            ReplicateBox replicateRightBox = rightBoxData.targetBox;
+
             Vector3 rightBoxPosition = BoddyTransform.position;
             rightBoxPosition.x = BoddyTransform.position.x + BoddyTransform.lossyScale.x * 0.5f -
                 BoddyTransform.transform.lossyScale.x * (1 - ratio) * 0.5f;
 
-            Vector3 rightBoxLocalScale = 
+            Vector3 rightBoxLocalScale =
                 new Vector3(1 - ratio, BoddyTransform.lossyScale.y, 1);
 
-            rightBox.transform.position = rightBoxPosition;
-            rightBox.transform.localScale = rightBoxLocalScale;
+            replicateRightBox.transform.position = rightBoxPosition;
+            replicateRightBox.transform.localScale = rightBoxLocalScale;
+
+            replicateRightBox.targetState = rightBoxData.color;
+            replicateRightBox.count = rightBoxData.count;
+
+            replicateRightBox.IsEnable(rightBoxData.isEnable);
+            replicateRightBox.UpdateData(replicateRightBox.transform.position,GetReplicateMaterial(replicateRightBox.targetState));
         }
 
         if(isMove)
