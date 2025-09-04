@@ -53,26 +53,42 @@ public class GameManager : MonoBehaviour
     #region GameState
 
     private Vector2 prevTouchPosition;
+    public GameObject obj;
+    private void Awake()
+    {
+        MoveBoxInputSetup();
+        inputAction.action.Enable();
+    }
+
 
     public void MoveBoxInputSetup()
     {
-        boxControl.started      += MoveBox_Started;
-        boxControl.performed    += MoveBox_Performed;
-        boxControl.canceled     += MoveBox_Cancled;
+        //inputAction.action.Reset();
+        inputAction.action.started      += MoveBox_Started;
+        inputAction.action.performed    += MoveBox_Performed;
+        inputAction.action.canceled     += MoveBox_Cancled;
     }
 
     private void MoveBox_Started(InputAction.CallbackContext _context)
     {
+        Debug.Log("aa");
         prevTouchPosition = _context.ReadValue<Vector2>();
-
 
         
     }
 
     private void MoveBox_Performed(InputAction.CallbackContext _context)
     {
-        Vector3 currentPosition = _context.ReadValue<Vector2>();
+        Debug.Log("aa");
+        Vector2 currentPosition = _context.ReadValue<Vector2>();
+
+        Vector2 tempDirection = currentPosition - prevTouchPosition;
+        float direction = Vector2.Dot(Vector2.right, tempDirection) < 0 ? -1 : 1;
         
+
+        obj.transform.position += direction * Vector3.right * 0.01f;
+
+
     }
 
     private void MoveBox_Cancled(InputAction.CallbackContext _context)
