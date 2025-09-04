@@ -25,9 +25,7 @@ public class GameManager : MonoBehaviour
                 {
                     GameObject gameManager = new GameObject("GameManager");
                     instance = gameManager.AddComponent<GameManager>();
-                }
-
-                    
+                }   
             }
 
             return instance;
@@ -46,22 +44,54 @@ public class GameManager : MonoBehaviour
     public static Action ClickEvent;
     public static Action<Transform> cameraTargetUpdate;
 
-
     private static readonly Color Blue = new Color(0f, 0f, 1f, 1f);
     private static readonly Color Orange = new Color(1f, 0.48f, 0f, 1f);
-    
 
-    private void OnEnable()
+    private InputAction boxControl      = new InputAction();
+    private InputAction changeBallColor = new InputAction();
+
+    #region GameState
+
+    private Vector2 prevTouchPosition;
+
+    public void MoveBoxInputSetup()
     {
-        ClickEvent += ChangeBallColor;
-
-        inputAction.action.performed += (_) => { ClickEvent?.Invoke(); };
+        boxControl.started      += MoveBox_Started;
+        boxControl.performed    += MoveBox_Performed;
+        boxControl.canceled     += MoveBox_Cancled;
     }
 
-    private void OnDisable()
+    private void MoveBox_Started(InputAction.CallbackContext _context)
     {
-        ClickEvent -= ChangeBallColor;
+        prevTouchPosition = _context.ReadValue<Vector2>();
+
+
+        
     }
+
+    private void MoveBox_Performed(InputAction.CallbackContext _context)
+    {
+        Vector3 currentPosition = _context.ReadValue<Vector2>();
+        
+    }
+
+    private void MoveBox_Cancled(InputAction.CallbackContext _context)
+    {
+
+        
+    }
+
+    public void Pause()
+    {
+        Time.timeScale = 0;
+    }
+
+    public void EndGame()
+    {
+
+    }
+
+    #endregion
 
     #region Ball
 
@@ -95,12 +125,12 @@ public class GameManager : MonoBehaviour
         return lowestBall.transform;
     }
 
-    private void ChangeBallColor()
-    {
-        ballColor = ballColor == BallColor.ORANGE ? BallColor.BLUE : BallColor.ORANGE;
+    //private void ChangeBallColor()
+    //{
+    //    ballColor = ballColor == BallColor.ORANGE ? BallColor.BLUE : BallColor.ORANGE;
 
-        ball_Material.color = ballColor == BallColor.ORANGE ? Orange : Blue;
-    }
+    //    ball_Material.color = ballColor == BallColor.ORANGE ? Orange : Blue;
+    //}
 
     #endregion
 }

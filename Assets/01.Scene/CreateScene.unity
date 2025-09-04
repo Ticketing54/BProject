@@ -2719,7 +2719,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ball_Material: {fileID: 2100000, guid: e3ef7f21b84014f408966e988336d852, type: 2}
   ballPrefab: {fileID: 5674322050922415379, guid: 31d7a344d36ab9340b9ec18599fb5e6e, type: 3}
-  inputAction: {fileID: -8674921819904479878, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  inputAction: {fileID: 0}
 --- !u!4 &1323446288
 Transform:
   m_ObjectHideFlags: 0
@@ -5963,8 +5963,16 @@ PrefabInstance:
       value: Main_UI
       objectReference: {fileID: 0}
     - target: {fileID: 3983053446869532582, guid: 841f1131441afce428a3cf47ddb633d7, type: 3}
+      propertyPath: m_margin.y
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 3983053446869532582, guid: 841f1131441afce428a3cf47ddb633d7, type: 3}
       propertyPath: m_RaycastTarget
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3983053446869532582, guid: 841f1131441afce428a3cf47ddb633d7, type: 3}
+      propertyPath: m_VerticalAlignment
+      value: 256
       objectReference: {fileID: 0}
     - target: {fileID: 4559457379680590485, guid: 841f1131441afce428a3cf47ddb633d7, type: 3}
       propertyPath: m_AnchorMax.x
@@ -5999,6 +6007,10 @@ PrefabInstance:
       value: Swipe & Release
       objectReference: {fileID: 0}
     - target: {fileID: 4893908462240809246, guid: 841f1131441afce428a3cf47ddb633d7, type: 3}
+      propertyPath: m_fontSize
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 4893908462240809246, guid: 841f1131441afce428a3cf47ddb633d7, type: 3}
       propertyPath: m_fontStyle
       value: 1
       objectReference: {fileID: 0}
@@ -6013,6 +6025,10 @@ PrefabInstance:
     - target: {fileID: 4893908462240809246, guid: 841f1131441afce428a3cf47ddb633d7, type: 3}
       propertyPath: m_fontColor.r
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4893908462240809246, guid: 841f1131441afce428a3cf47ddb633d7, type: 3}
+      propertyPath: m_fontSizeMax
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 4893908462240809246, guid: 841f1131441afce428a3cf47ddb633d7, type: 3}
       propertyPath: m_fontColor32.rgba
@@ -6073,6 +6089,10 @@ PrefabInstance:
     - target: {fileID: 7265933893434491713, guid: 841f1131441afce428a3cf47ddb633d7, type: 3}
       propertyPath: m_RaycastTarget
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7265933893434491713, guid: 841f1131441afce428a3cf47ddb633d7, type: 3}
+      propertyPath: m_PixelsPerUnitMultiplier
+      value: 7.96
       objectReference: {fileID: 0}
     - target: {fileID: 7402769925571067338, guid: 841f1131441afce428a3cf47ddb633d7, type: 3}
       propertyPath: m_Pivot.x
@@ -6154,11 +6174,39 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7937492966370336002, guid: 841f1131441afce428a3cf47ddb633d7, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7937492966370336002, guid: 841f1131441afce428a3cf47ddb633d7, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1886027153065630689, guid: 841f1131441afce428a3cf47ddb633d7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 9222489388199785625}
   m_SourcePrefab: {fileID: 100100000, guid: 841f1131441afce428a3cf47ddb633d7, type: 3}
+--- !u!1 &9222489388199785624 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1886027153065630689, guid: 841f1131441afce428a3cf47ddb633d7, type: 3}
+  m_PrefabInstance: {fileID: 9222489388199785623}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &9222489388199785625
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9222489388199785624}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aeeab7cacd9002c46ba2bdfdae005fd9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

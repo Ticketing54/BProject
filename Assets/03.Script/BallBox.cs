@@ -7,8 +7,6 @@ public class BallBox : MonoBehaviour
     private Sequence closeBoxAnimation;
     private Sequence dropBoxAnimation;
 
-    private bool isPossableMove = false;
-
     [SerializeField] private Transform boxBody;
     [SerializeField] private Transform leftBoxWing;
     [SerializeField] private Transform rightBoxWing;
