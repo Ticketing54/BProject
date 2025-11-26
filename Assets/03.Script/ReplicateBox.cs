@@ -18,13 +18,13 @@ public class ReplicateBox : MonoBehaviour
 
     private void OnEnable()
     {
-        GameManager.ClickEvent += UpdateConeState;
+        InputManager.GeneralClickEvent += UpdateConeState;
         UpdateConeState();
     }
 
     private void OnDisable()
     {
-        GameManager.ClickEvent -= UpdateConeState;
+        InputManager.GeneralClickEvent -= UpdateConeState;
     }
 
     private void UpdateConeState()
