@@ -3,17 +3,23 @@ using UnityEngine;
 
 
 public class Ball : MonoBehaviour
-{
-    [SerializeField] private MeshRenderer meshRenderer;
+{   
     [SerializeField] private Rigidbody rig;
 
-    private void OnEnable()
+    public void ClearForces()
     {
-        GameManager.Instance.AddAliveBall(this);
+        if(rig == null)
+        {
+            Debug.LogError("Ball: Rigidbody reference is missing.");
+            return;
+        }
+
+        rig.linearVelocity = Vector3.zero;
+        rig.angularVelocity = Vector3.zero;
     }
 
-    private void OnDisable()
+    public void Move(Vector3 _position)
     {
-        GameManager.Instance.RemoveAlliveBall(this);
+        rig.MovePosition(_position);
     }
 }

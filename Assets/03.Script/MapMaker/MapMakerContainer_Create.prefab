@@ -45,7 +45,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   elementList:
-  - type: 6
-    elementObject: {fileID: 3055412734596849539, guid: 2eca985fc020fad4f92699fa73021e4b, type: 3}
-  - type: 2
+  - type: 1
     elementObject: {fileID: 5410796104679807865, guid: ea86d8c06822ac74799d74cca29b966d, type: 3}
+  - type: 2
+    elementObject: {fileID: 4539666670879035203, guid: 23cc4a51e4e411449acfd47055d8b439, type: 3}
+  - type: 3
+    elementObject: {fileID: 8757568284209327168, guid: fe5050143c1ff244db517cd24b60a446, type: 3}

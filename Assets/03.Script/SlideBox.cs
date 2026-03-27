@@ -4,13 +4,13 @@ using UnityEngine;
 public class SlideBox : MonoBehaviour
 {
     [Header("BoxData")]
-    [SerializeField] private ReplicateBox prefab;
+    [SerializeField] private ReplicateRange prefab;
     [SerializeField] private float moveSpeed = 0.1f;
     [Range(0, 1)][SerializeField] private float ratio;
 
-    private ReplicateBox leftBox;
-    private ReplicateBox rightBox;
-    private ReplicateBox tempBox;
+    private ReplicateRange leftBox;
+    private ReplicateRange rightBox;
+    private ReplicateRange tempBox;
     private float leftOriginX;
     private float rightOriginX;
 
@@ -50,7 +50,7 @@ public class SlideBox : MonoBehaviour
             GameObject destroyBox = leftBox.gameObject;
             leftBox = rightBox;
             rightBox = tempBox;
-            tempBox = GameObject.Instantiate<ReplicateBox>(leftBox);
+            tempBox = GameObject.Instantiate<ReplicateRange>(leftBox);
             Destroy(destroyBox);
 
             tempBox.transform.SetParent(SlideBoxTransform);
@@ -75,17 +75,17 @@ public class SlideBox : MonoBehaviour
 
     private void Setup()
     {
-        leftBox = GameObject.Instantiate<ReplicateBox>(prefab);
+        leftBox = GameObject.Instantiate<ReplicateRange>(prefab);
         leftBox.transform.SetParent(SlideBoxTransform);
         leftBox.transform.localScale = GetLocalXScale(ratio);
         leftOriginX = leftBox.transform.localScale.x;
 
-        rightBox = GameObject.Instantiate<ReplicateBox>(prefab);
+        rightBox = GameObject.Instantiate<ReplicateRange>(prefab);
         rightBox.transform.SetParent(SlideBoxTransform);
         rightBox.transform.localScale = GetLocalXScale((1 - ratio));
         rightOriginX = rightBox.transform.localScale.x;
 
-        tempBox = GameObject.Instantiate<ReplicateBox>(leftBox);
+        tempBox = GameObject.Instantiate<ReplicateRange>(leftBox);
         tempBox.transform.SetParent(SlideBoxTransform);
         tempBox.transform.localScale = GetLocalXScale(0);
 

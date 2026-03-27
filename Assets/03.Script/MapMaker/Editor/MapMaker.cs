@@ -1,3 +1,4 @@
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -5,22 +6,25 @@ using UnityEngine.SceneManagement;
 [InitializeOnLoad]
 public static class MapMaker
 {
+    private static int stateLevel = 1;
     private static float stageLength = 300f;
+    private static int startBallCount = 1;
     private const string SAVE_PATH = "Assets/05.Data/MapData/";
     private const string MAKE_SCENE_NAME = "CreateScene";
-    private static MapElement.MapMakerElementType tempElement;
+    private static DataBundle.ObstacleType tempElement;
 
-    private static MapMakerContainer mapMakerContainer;
-    private static MapMakerContainer MapMakerContainer
+    private static MapMakerManager mapMakerManager;
+    private static MapMakerManager MapMakerManager
     {
         get
         {
-            if (mapMakerContainer == null)
-                mapMakerContainer = GameObject.FindAnyObjectByType<MapMakerContainer>();
+            if (mapMakerManager == null)
+                mapMakerManager = GameObject.FindAnyObjectByType<MapMakerManager>();
 
-            return mapMakerContainer;
+            return mapMakerManager;
         }
     }
+
     static MapMaker()
     {
         SceneView.duringSceneGui += OnSceneGUI;
@@ -41,7 +45,7 @@ public static class MapMaker
         Handles.BeginGUI();
 
         float boxWidth = 200f;
-        float padding = 10f;
+        float padding = 20f;
 
         Rect boxRect = new Rect(
             sceneView.position.width - boxWidth - padding,
@@ -63,8 +67,14 @@ public static class MapMaker
 
         GUILayout.Space(20);
 
+        GUILayout.Label("스테이지 레벨");
+        stateLevel = EditorGUILayout.IntField(stateLevel);
+
         GUILayout.Label("스테이지 길이 설정");
         stageLength = EditorGUILayout.FloatField(stageLength);
+
+        GUILayout.Label("시작 공갯수[1~10]");
+        startBallCount = EditorGUILayout.IntField(startBallCount);
 
         GUILayout.Space(10);
 
@@ -77,11 +87,11 @@ public static class MapMaker
 
         GUILayout.Label("구성요소 생성", labelCenterStyle);
 
-        tempElement = (MapElement.MapMakerElementType)EditorGUILayout.EnumPopup(tempElement,popupCenterStyle); // 드롭다운표시
+        tempElement = (DataBundle.ObstacleType)EditorGUILayout.EnumPopup(tempElement,popupCenterStyle); // 드롭다운표시
 
         if(GUILayout.Button("생성"))
         {
-            if (tempElement == MapElement.MapMakerElementType.NONE)
+            if (tempElement == DataBundle.ObstacleType.NONE)
                 return;
 
             CreateMapElement();
@@ -105,76 +115,72 @@ public static class MapMaker
 
     private static void ApplyButton()
     {
-        MapElement[] mapElement = GameObject.FindObjectsByType<MapElement>(FindObjectsSortMode.None);
-
-        foreach (MapElement one in mapElement)
+        if(MapMakerManager == null)
         {
-            if (one.ElementType != MapElement.MapMakerElementType.WALL)
-                continue;
-
-            Vector3 targetScale = one.transform.localScale;
-            Vector3 targetPosition = one.transform.localPosition;
-
-            targetScale.y = stageLength;
-            targetPosition.y = stageLength * 0.5f;
-
-            one.transform.localScale = targetScale;
-            one.transform.localPosition = targetPosition;
+            Debug.LogError("ObjectContainer 가 존재하지않아 적용 불가능!");
+            return;
         }
 
+        startBallCount = Mathf.Clamp(startBallCount, 1, 10);
+
+        MapMakerManager.CreateObjects(stageLength,startBallCount);
     }
 
 
     private static void SaveData()
-    {
-        MapData newMapData = ScriptableObject.CreateInstance<MapData>();
-        MapElement[] elementDatas = GameObject.FindObjectsByType<MapElement>(FindObjectsSortMode.None);
-
-        foreach(MapElement element in elementDatas)
+    {   
+        if (!AssetDatabase.IsValidFolder(SAVE_PATH))
         {
-            MapData.ObstacleData obstacleData = new MapData.ObstacleData();
-            obstacleData.type = element.ElementType;
-            obstacleData.target_Position = element.transform.position;
-            obstacleData.target_Rotation = element.transform.rotation;
-            obstacleData.target_Scale = element.transform.lossyScale;
-
-
-            newMapData.targetData_List.Add(obstacleData);
+            string[] folders = SAVE_PATH.Split('/');
+            string currentPath = folders[0];
+            for (int i = 1; i < folders.Length; i++)
+            {
+                if (!AssetDatabase.IsValidFolder(currentPath + "/" + folders[i]))
+                {
+                    AssetDatabase.CreateFolder(currentPath, folders[i]);
+                }
+                currentPath += "/" + folders[i];
+            }
         }
 
-        int index = 1;
-        string newPath = $"{SAVE_PATH}Mapdata.asset";
+        StageData newStage = ScriptableObject.CreateInstance<StageData>();
 
-        while (System.IO.File.Exists(newPath))
+        newStage.stagesLvel = stateLevel;
+        newStage.stageLength = stageLength;
+        newStage.startBallCount = startBallCount;
+
+        var founds = Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None)
+                           .OfType<IObstacle>();
+
+        foreach (var obstacle in founds)
         {
-            newPath = SAVE_PATH + "MapData_" + index + ".asset";
-            index++;
+            newStage.obstacleData.Add(obstacle.GetObstacleData());
         }
 
-        AssetDatabase.CreateAsset(newMapData, newPath);
+        string fullPath = $"{SAVE_PATH}/NewState.asset";
+
+        fullPath = AssetDatabase.GenerateUniqueAssetPath(fullPath);
+
+        AssetDatabase.CreateAsset(newStage, fullPath);
         AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
 
-        Debug.Log($"PlayerData saved to {newPath}");
+        Debug.Log($"<color=green><b>[Save Success]</b></color> {fullPath} 맵 정보가 생성되었습니다.");
+
+        EditorUtility.FocusProjectWindow();
+        Selection.activeObject = newStage;
+
     }
 
     private static void CreateMapElement()
     {
-        if (MapMakerContainer == null)
+        if (MapMakerManager == null)
         {
-            Debug.LogError("MapMakerContainer 가 존재하지않아 생성 불가능!");
+            Debug.LogError("objectContainer 가 존재하지않아 생성 불가능!");
             return;
         }
 
-        GameObject element = MapMakerContainer.GetElementObject(tempElement);
-
-        if(element == null)
-        {
-            Debug.LogError("해당 Enum 에 등록된 Element Object 가 없습니다.");
-        }
-
-        GameObject newElement = GameObject.Instantiate(element);
-        newElement.transform.SetParent(null);
-        newElement.transform.position = Vector3.zero;
+        mapMakerManager.CreateObjstacle(tempElement);
     }
 
 }
