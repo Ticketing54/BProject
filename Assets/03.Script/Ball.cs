@@ -22,4 +22,11 @@ public class Ball : MonoBehaviour
     {
         rig.MovePosition(_position);
     }
+
+    public void ConstraintsPositionZ(bool _isLock)
+    {
+        rig.constraints = _isLock
+       ? rig.constraints | RigidbodyConstraints.FreezePositionZ
+       : rig.constraints & ~RigidbodyConstraints.FreezePositionZ;
+    }
 }

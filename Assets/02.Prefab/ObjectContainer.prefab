@@ -47,8 +47,6 @@ MonoBehaviour:
   ballPrefab: {fileID: 6003489229025045489, guid: 31d7a344d36ab9340b9ec18599fb5e6e, type: 3}
   ballMaterial: {fileID: 2100000, guid: e3ef7f21b84014f408966e988336d852, type: 2}
   ballColor: 0
-  Replicate_Material_StartBlue: {fileID: 0}
-  Replicate_Material_StartOrange: {fileID: 0}
   prefab_List:
   - prefabtype: 1
     prefab: {fileID: 5410796104679807865, guid: ea86d8c06822ac74799d74cca29b966d, type: 3}
@@ -58,3 +56,5 @@ MonoBehaviour:
     prefab: {fileID: 8757568284209327168, guid: fe5050143c1ff244db517cd24b60a446, type: 3}
   - prefabtype: 4
     prefab: {fileID: 9147123377430534099, guid: 4bb48c56ce2462f4b9b34752d17212be, type: 3}
+  obstacle_OrangeMaterial: {fileID: 2100000, guid: 9fae836bd3b0a3c46bc4b96dd841ad47, type: 2}
+  obstacle_BlueMaterial: {fileID: 2100000, guid: 2aa7eaf7da1afd24695a512b8175f0f3, type: 2}

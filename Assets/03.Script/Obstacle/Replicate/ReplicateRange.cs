@@ -8,8 +8,8 @@ public class ReplicateRange : MonoBehaviour
     [SerializeField] private MeshRenderer meshRenderer;
     [SerializeField] private Canvas canvas;
 
-    private DataBundle.BallColor targetColor;
-    private int count;
+    [HideInInspector][SerializeField] private DataBundle.BallColor targetColor;
+    [HideInInspector][SerializeField] private int count;
 
     public DataBundle.BallColor TargetColor=> targetColor;
     public int Count => count;
@@ -44,14 +44,13 @@ public class ReplicateRange : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log("ReplicateBox OnTriggerEnter");
-
         if (other.TryGetComponent<Ball>(out Ball ball))
         {
             CheckBall?.Invoke(ball, this);
         }
     }
-
+#if UNITY_EDITOR
+#endif
 
     public void UpdateData(DataBundle.BallColor _targetColor, int _count)
     {
@@ -65,15 +64,9 @@ public class ReplicateRange : MonoBehaviour
         Color color = _targetColor == DataBundle.BallColor.BLUE ? DataBundle.COLOR_ALPHA_BLUE : DataBundle.COLOR_ALPHA_ORANGE;
 
 
-        MaterialPropertyBlock propBlock = new MaterialPropertyBlock();
+        meshRenderer.material = GameManager.Instance?.GetObstacleMaterial(_targetColor);
 
-        meshRenderer.GetPropertyBlock(propBlock);
-
-        propBlock.SetColor("_BaseColor", color);
-
-        meshRenderer.SetPropertyBlock(propBlock);
-
-        canvas.worldCamera = Camera.main;
+        canvas.worldCamera = Camera.main ?? null;
     }
 
 }

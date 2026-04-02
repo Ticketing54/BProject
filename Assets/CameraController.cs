@@ -23,7 +23,6 @@ public class CameraController : MonoBehaviour
     private float startPostionY = 0;
     private const float endPostionY = -15;
 
-
     private void Start()
     {
         offset = transform.position;
@@ -42,7 +41,7 @@ public class CameraController : MonoBehaviour
         while (true)
         {
             if (target != null)
-            {
+            {   
                 offset.y = target.transform.position.y;
                 transform.position = offset;
             }
@@ -50,6 +49,7 @@ public class CameraController : MonoBehaviour
             yield return null;
         }
     }
+
     #region OPENING
 
     public void SetOpeningData(float _length)
@@ -65,13 +65,10 @@ public class CameraController : MonoBehaviour
         
         cameraRoutine = StartCoroutine(AnimateCamera(_callback));
     }
-
-    #endregion
-
     IEnumerator AnimateCamera(Action _callback)
     {
         Debug.Log("AnimateCamera started");
-        float duration = animationDuration; 
+        float duration = animationDuration;
         float elapsed = 0;
 
         Vector3 animationStartPosition = new Vector3(transform.position.x, endPostionY, transform.position.z);
@@ -90,6 +87,10 @@ public class CameraController : MonoBehaviour
 
         LookAtTarget();
     }
+
+    #endregion
+
+
 
 
 #if UNITY_EDITOR

@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Unity.VectorGraphics;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 
 public class GameManager : MonoBehaviour
@@ -16,11 +14,11 @@ public class GameManager : MonoBehaviour
             {
                 instance = FindAnyObjectByType<GameManager>();
 
-                if (instance == null)
+                if (instance == null && Application.isPlaying)
                 {
                     //GameObject gameManager = new GameObject("GameManager");
                     //instance = gameManager.AddComponent<GameManager>();
-
+                    
                     Debug.LogError("GameManager instance not found in the scene");
 
                 }
@@ -47,7 +45,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private ObjectContainer objectContainer;
 
     // Camera
-    [SerializeField] private CameraController cameraTarget;
+    [SerializeField] private CameraController cameraController;
 
     // UImanager
     [SerializeField] private UIManager uiManager;
@@ -58,34 +56,65 @@ public class GameManager : MonoBehaviour
     [SerializeField] private bool isTestMode = false;
 
     // Input
-    
+
     public Action InputClickDown;
     public Action InputClickUp;
+
     public Vector2 Direction = Vector2.zero;
 
     private eGameState currentGameState = eGameState.None;
     private int playLevel = 1;
+    private int stageScore = 0;
+
+
+
+
+    public event Action<int> OnScoreChanged;
+    public event Action<Action> OnFadeInRequest;
+    public event Action<Action> OnFadeOutRequest;
+    
 
     private void Awake()
     {
         if (objectContainer == null)
             Debug.LogError("Ball Container is not assigned in GameManager.");
-        
-        if(isTestMode)
+
+        InputClickDown += ChangeBallColor;
+        uiManager.OnClick_NextStage += () => NextStage(false);
+        uiManager.Onclick_Retry += () => NextStage(true);
+
+        if (isTestMode)
         {
             StartGame(eGameState.Test);
             return;
         }
 
         StartGame(eGameState.Intro);
+
+
     }
 
+
+    public void SetScore(int _score)
+    {
+        stageScore = _score;
+        OnScoreChanged?.Invoke(stageScore);
+    }
+
+    public string GetScore()
+    {
+        return stageScore.ToString();
+    }
 
     #region Camera
 
     private Transform camearaTarget;
 
-    public void SetCameraTarget(Transform _Target = null) => camearaTarget = _Target;
+    public void SetCameraTarget(Transform _Target = null)
+    {
+        camearaTarget = _Target;
+        cameraController.LookAtTarget();
+    }
 
     public Transform GetCameraTarget()
     {
@@ -100,6 +129,9 @@ public class GameManager : MonoBehaviour
     {
         List<Ball> ballList = objectContainer.ActiveBallList();
 
+        if (ballList == null)
+            return null;
+       
         Ball lowestBall = ballList.Count == 0 ? null : ballList[0];
 
         foreach (Ball ball in ballList)
@@ -119,8 +151,6 @@ public class GameManager : MonoBehaviour
 
     #region Ball
 
-
-
     public void ChangeBallColor() => objectContainer?.ChangeBallColor();
     public DataBundle.BallColor CurrentBallColor => objectContainer.CurrentBallColor;
     public void ReturnBall(Ball _ball) => objectContainer?.ReleaseBall(_ball);
@@ -129,16 +159,13 @@ public class GameManager : MonoBehaviour
     public void ClearAllBalls() => objectContainer?.ReleaseAllActiveBalls();
     #endregion
 
-    #region Camera
+    public Material GetObstacleMaterial(DataBundle.BallColor _targetColor)
+    {
+        if (objectContainer == null)
+            return null;
 
-
-    #endregion
-
-    #region ReplicateBox
-
-    public DataBundle.BallColor ReplicateBoxColorCheck(Material _material) => objectContainer?.ReplicateBoxColorCheck(_material) ?? DataBundle.BallColor.BLUE;
-
-    #endregion
+        return objectContainer.GetObstacle_Material(_targetColor);
+    }
 
     public void CreateStartBall(int _count)
     {
@@ -158,6 +185,14 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void NextStage(bool _isRestart)
+    {
+        playLevel = _isRestart ? playLevel : playLevel + 1;
+
+        StartGame(eGameState.Ready);
+    }
+
+
     public void StartGame(eGameState _nextState)
     {
         currentGameState = _nextState;
@@ -173,7 +208,7 @@ public class GameManager : MonoBehaviour
                 Intro();
                 break;
             case eGameState.Ready:          // 스테이지 전환 준비 (UI FadeIn)
-                uiManager?.StartFadeIn(() => StartGame(eGameState.Loading));
+                OnFadeInRequest?.Invoke(() => StartGame(eGameState.Loading));
                 break;
             case eGameState.Loading:        // 리소스 로드 및 스테이지 배치
 
@@ -183,18 +218,20 @@ public class GameManager : MonoBehaviour
 
                 CreateStartBall(stageData.startBallCount);
 
-                cameraTarget.SetOpeningData(stageData.stageLength);
+                cameraController.SetOpeningData(stageData.stageLength);
 
                 objectContainer.StateSet(stageData);
+
+                SetScore(0);
 
                 StartGame(eGameState.Active);
 
                 break;
             case eGameState.Active:
-                uiManager.StartFadeOut(() => StartGame(eGameState.Cutscene));
+                OnFadeOutRequest?.Invoke(() => StartGame(eGameState.Cutscene));
                 break;
             case eGameState.Cutscene:
-                cameraTarget.StartOpening(() => StartGame(eGameState.Playing));
+                cameraController.StartOpening(() => StartGame(eGameState.Playing));
                 break;
             case eGameState.Playing:
                 SetCameraTarget(startBox.transform);
@@ -223,5 +260,6 @@ public class GameManager : MonoBehaviour
         objectContainer.StateSet(stageData);                            // 오브젝트 컨테이너에 스테이지 데이터 전달 및 스테이지 배치 
 
         SetCameraTarget(startBox.transform);                            // 카메라 타겟 설정
+
     }
 }

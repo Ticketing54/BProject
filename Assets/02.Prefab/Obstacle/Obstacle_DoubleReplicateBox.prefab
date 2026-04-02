@@ -343,7 +343,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 9f8e1c072738d474eb12e554a858bf2b, type: 2}
+  - {fileID: 2100000, guid: 2aa7eaf7da1afd24695a512b8175f0f3, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -403,6 +403,8 @@ MonoBehaviour:
   textMeshProUGUI_Count: {fileID: 4167257590594106956}
   meshRenderer: {fileID: 7935377130317581777}
   canvas: {fileID: 3976771939204582311}
+  targetColor: 1
+  count: 1
 --- !u!1 &3032363397387468046
 GameObject:
   m_ObjectHideFlags: 0
@@ -718,7 +720,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 9f8e1c072738d474eb12e554a858bf2b, type: 2}
+  - {fileID: 2100000, guid: 9fae836bd3b0a3c46bc4b96dd841ad47, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -778,6 +780,8 @@ MonoBehaviour:
   textMeshProUGUI_Count: {fileID: 6186938112745372598}
   meshRenderer: {fileID: 6191044125172517558}
   canvas: {fileID: 164894019927500156}
+  targetColor: 0
+  count: 1
 --- !u!1 &8757568284209327168
 GameObject:
   m_ObjectHideFlags: 0
@@ -827,6 +831,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ReplicateController
   boxList:
   - {fileID: 459454480312655338}
+  - {fileID: 6216195395465997275}
 --- !u!114 &1806139327806323633
 MonoBehaviour:
   m_ObjectHideFlags: 0

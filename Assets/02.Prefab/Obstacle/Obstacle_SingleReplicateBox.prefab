@@ -75,6 +75,10 @@ PrefabInstance:
       propertyPath: m_Camera
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 613518086041447200, guid: 51ab9ac0daf2ef041b6b8becdaa8a124, type: 3}
+      propertyPath: count
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2255938089096123010, guid: 51ab9ac0daf2ef041b6b8becdaa8a124, type: 3}
       propertyPath: m_LocalScale.z
       value: 1
@@ -142,7 +146,7 @@ PrefabInstance:
     - target: {fileID: 8195860882408962167, guid: 51ab9ac0daf2ef041b6b8becdaa8a124, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 9f8e1c072738d474eb12e554a858bf2b, type: 2}
+      objectReference: {fileID: 2100000, guid: 9fae836bd3b0a3c46bc4b96dd841ad47, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

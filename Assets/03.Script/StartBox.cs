@@ -1,6 +1,5 @@
 using DG.Tweening;
 using System.Collections.Generic;
-using UnityEditor.Overlays;
 using UnityEngine;
 
 public class StartBox : MonoBehaviour
@@ -119,7 +118,7 @@ public class StartBox : MonoBehaviour
 
     public List<Transform> GetStartBallPosition()
     {
-        if(startPosition == null || startPosition.Count == 0)
+        if (startPosition == null || startPosition.Count == 0)
         {
             Debug.LogError("StartBox: Start positions are not assigned.");
             return null;
@@ -128,7 +127,7 @@ public class StartBox : MonoBehaviour
         List<Transform> shuffledPositions = new List<Transform>(startPosition);
 
         for (int i = shuffledPositions.Count - 1; i > 0; i--)
-        {   
+        {
             int randomIndex = UnityEngine.Random.Range(0, i + 1);
 
             Transform temp = shuffledPositions[i];

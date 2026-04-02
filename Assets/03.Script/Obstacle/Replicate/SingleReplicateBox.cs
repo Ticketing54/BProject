@@ -1,4 +1,3 @@
-using UnityEditor;
 using UnityEngine;
 
 public class SingleReplicateBox : MonoBehaviour, IObstacle
@@ -9,7 +8,7 @@ public class SingleReplicateBox : MonoBehaviour, IObstacle
 
     private void OnValidate()
     {
-        if (!Application.isPlaying) 
+        if (Application.isPlaying)
             return;
 
         UpdateData();

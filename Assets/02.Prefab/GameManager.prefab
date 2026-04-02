@@ -26,7 +26,7 @@ Transform:
   m_GameObject: {fileID: 7090073230877235732}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 60.63, z: 0}
+  m_LocalPosition: {x: 105.45306, y: 95, z: -208.79745}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -92,10 +92,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   objectContainer: {fileID: 1263154207797267718}
-  cameraTarget: {fileID: 1503477166910043441}
+  cameraController: {fileID: 1503477166910043441}
   uiManager: {fileID: 0}
   stageContainer: {fileID: 8615655902002769833}
   startBox: {fileID: 0}
+  isTestMode: 0
+  Direction: {x: 0, y: 0}
 --- !u!1001 &3829436510942901541
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -221,6 +223,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7924190014349543252, guid: 0eb70cb103a8a4c439e6fed9e9113580, type: 3}
+      propertyPath: prefab_List.Array.data[0].prefab
+      value: 
+      objectReference: {fileID: 1703819938113429788, guid: fd2f35ecd75da5f4583ae063982fca1a, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

@@ -8,10 +8,6 @@ public class InputHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
     private Vector2 direction   = Vector2.zero;
     private GameManager gameManager => GameManager.Instance;
 
-    private void Awake()
-    {
-        
-    }
 
     public void OnDrag(PointerEventData eventData)
     {

@@ -10,8 +10,8 @@ public class ObjectContainer : MonoBehaviour
     [Serializable]
     private class ObstaclePrefabData
     {
-        public DataBundle.ObstacleType prefabtype;
-        public GameObject prefab;
+        public DataBundle.ObstacleType prefabtype = DataBundle.ObstacleType.NONE;
+        public GameObject prefab ;
     }
 
     [Header("Ball Settings")]
@@ -19,11 +19,10 @@ public class ObjectContainer : MonoBehaviour
     [SerializeField] private Material ballMaterial;
     [SerializeField] private DataBundle.BallColor ballColor;
 
-    [SerializeField] private Material Replicate_Material_StartBlue;
-    [SerializeField] private Material Replicate_Material_StartOrange;
-
     [Header("Obstacles")]
-    [SerializeField] List<ObstaclePrefabData> prefab_List;
+    [SerializeField] private List<ObstaclePrefabData> prefab_List;
+    [SerializeField] private Material obstacle_OrangeMaterial;
+    [SerializeField] private Material obstacle_BlueMaterial;
 
     private List<GameObject> wall_List = new List<GameObject>();
 
@@ -67,12 +66,6 @@ public class ObjectContainer : MonoBehaviour
         else
             Debug.LogError(_ball.name + " is not found in activeBall set.");
 
-    }
-    
-    public DataBundle.BallColor ReplicateBoxColorCheck(Material _material)
-    {
-        return _material == Replicate_Material_StartBlue ?
-        DataBundle.BallColor.BLUE : DataBundle.BallColor.ORANGE;
     }
 
     private void Setup()
@@ -161,7 +154,8 @@ public class ObjectContainer : MonoBehaviour
     #endregion
 
     #region Obstacle
-
+    public Material GetObstacle_Material(DataBundle.BallColor _targetColor) 
+        => _targetColor== DataBundle.BallColor.BLUE ? obstacle_BlueMaterial : obstacle_OrangeMaterial;
     public GameObject GetObstacleObject(DataBundle.ObstacleType _type)
     {
         int index = prefab_List.FindIndex(o => o.prefabtype == _type);
