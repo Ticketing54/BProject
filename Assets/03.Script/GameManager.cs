@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -14,12 +15,16 @@ public class GameManager : MonoBehaviour
             {
                 instance = FindAnyObjectByType<GameManager>();
 
-                if (instance == null && Application.isPlaying)
+                if (instance == null)
                 {
                     //GameObject gameManager = new GameObject("GameManager");
                     //instance = gameManager.AddComponent<GameManager>();
-                    
-                    Debug.LogError("GameManager instance not found in the scene");
+
+                    if (Application.isPlaying)
+                    {
+                        Debug.LogError("GameManager instance not found in the scene");
+
+                    }
 
                 }
             }
@@ -53,6 +58,7 @@ public class GameManager : MonoBehaviour
 
     // StartBox
     [SerializeField] private StartBox startBox;
+    [SerializeField] private EndBox endBox;
     [SerializeField] private bool isTestMode = false;
 
     // Input
@@ -65,14 +71,14 @@ public class GameManager : MonoBehaviour
     private eGameState currentGameState = eGameState.None;
     private int playLevel = 1;
     private int stageScore = 0;
+    private StageData currentStageData;
 
-
-
-
-    public event Action<int> OnScoreChanged;
+    public event Action<int,int> OnScoreChanged;
     public event Action<Action> OnFadeInRequest;
     public event Action<Action> OnFadeOutRequest;
-    
+    public event Action<bool> OnOpenResultPage;
+    public event Action ResetObject;
+    public event Action<bool> OnBlockInput;
 
     private void Awake()
     {
@@ -80,32 +86,42 @@ public class GameManager : MonoBehaviour
             Debug.LogError("Ball Container is not assigned in GameManager.");
 
         InputClickDown += ChangeBallColor;
-        uiManager.OnClick_NextStage += () => NextStage(false);
-        uiManager.Onclick_Retry += () => NextStage(true);
+    }
 
+
+    private void Start()
+    {
         if (isTestMode)
         {
-            StartGame(eGameState.Test);
+            ChangeGameState(eGameState.Test);
             return;
         }
 
-        StartGame(eGameState.Intro);
-
-
+        ChangeGameState(eGameState.Intro);
     }
 
+    public bool IsAllBallsEntered(int _count) => _count >= objectContainer.ActiveBallCount;
 
     public void SetScore(int _score)
     {
         stageScore = _score;
-        OnScoreChanged?.Invoke(stageScore);
+        OnScoreChanged?.Invoke(stageScore, currentStageData.goalScore);
+
+        if (IsAllBallsEntered(_score) && !isTestMode)
+            ChangeGameState(eGameState.Result);
     }
 
     public string GetScore()
     {
         return stageScore.ToString();
     }
-
+    private void SetTargetToEndBox(int _score,int _goalScore)
+    {
+        if (_score == 1)
+        {
+            camearaTarget = endBox.transform;
+        }
+    }
     #region Camera
 
     private Transform camearaTarget;
@@ -153,10 +169,16 @@ public class GameManager : MonoBehaviour
 
     public void ChangeBallColor() => objectContainer?.ChangeBallColor();
     public DataBundle.BallColor CurrentBallColor => objectContainer.CurrentBallColor;
-    public void ReturnBall(Ball _ball) => objectContainer?.ReleaseBall(_ball);
+    public void ReturnBall(Ball _ball)
+    {
+        objectContainer?.ReleaseBall(_ball);
+
+        if (objectContainer.ActiveBallCount <= 0 && currentGameState != eGameState.Loading)
+            ChangeGameState(eGameState.Result);
+
+    }
     public Ball CreateBall(Vector3 _position) => objectContainer?.GetBall(_position);
 
-    public void ClearAllBalls() => objectContainer?.ReleaseAllActiveBalls();
     #endregion
 
     public Material GetObstacleMaterial(DataBundle.BallColor _targetColor)
@@ -187,13 +209,12 @@ public class GameManager : MonoBehaviour
 
     public void NextStage(bool _isRestart)
     {
-        playLevel = _isRestart ? playLevel : playLevel + 1;
-
-        StartGame(eGameState.Ready);
+        //playLevel = _isRestart ? playLevel : playLevel + 1;
+        ChangeGameState(eGameState.Ready);
     }
 
 
-    public void StartGame(eGameState _nextState)
+    public void ChangeGameState(eGameState _nextState)
     {
         currentGameState = _nextState;
 
@@ -208,36 +229,39 @@ public class GameManager : MonoBehaviour
                 Intro();
                 break;
             case eGameState.Ready:          // 스테이지 전환 준비 (UI FadeIn)
-                OnFadeInRequest?.Invoke(() => StartGame(eGameState.Loading));
+                OnFadeInRequest?.Invoke(() => ChangeGameState(eGameState.Loading));
                 break;
             case eGameState.Loading:        // 리소스 로드 및 스테이지 배치
 
-                StageData stageData = stageContainer.GetStageData(playLevel);
+                ResetObject?.Invoke();
 
-                startBox.SetStartPosition(stageData.stageLength);
+                currentStageData = stageContainer.GetStageData(playLevel);
 
-                CreateStartBall(stageData.startBallCount);
+                startBox.SetStartPosition(currentStageData.stageLength);
 
-                cameraController.SetOpeningData(stageData.stageLength);
+                CreateStartBall(currentStageData.startBallCount);
 
-                objectContainer.StateSet(stageData);
+                cameraController.SetOpeningData(currentStageData.stageLength);
 
-                SetScore(0);
+                objectContainer.StateSet(currentStageData);
 
-                StartGame(eGameState.Active);
+                ChangeGameState(eGameState.Active);
 
                 break;
             case eGameState.Active:
-                OnFadeOutRequest?.Invoke(() => StartGame(eGameState.Cutscene));
+                OnFadeOutRequest?.Invoke(() => ChangeGameState(eGameState.Cutscene));
                 break;
             case eGameState.Cutscene:
-                cameraController.StartOpening(() => StartGame(eGameState.Playing));
+                cameraController.StartOpening(() => { ChangeGameState(eGameState.Playing); });
                 break;
             case eGameState.Playing:
+                OnBlockInput?.Invoke(false);
                 SetCameraTarget(startBox.transform);
                 // 입력 활성화
                 break;
             case eGameState.Result:
+                OnBlockInput?.Invoke(true);
+                Result();
                 break;
         }
     }
@@ -251,15 +275,31 @@ public class GameManager : MonoBehaviour
     {
         playLevel = PlayerPrefs.GetInt("PlayerLevel", 1);               //  플레이어 레벨 불러오기 (기본값 1)
 
-        StageData stageData = stageContainer.GetStageData(playLevel);   // 스테이지 데이터 불러오기
+        currentStageData = stageContainer.GetStageData(playLevel);   // 스테이지 데이터 불러오기
 
-        startBox.SetStartPosition(stageData.stageLength);               // 스타트 박스 위치 설정
+        startBox.SetStartPosition(currentStageData.stageLength);               // 스타트 박스 위치 설정
 
-        CreateStartBall(stageData.startBallCount);                      // 시작 볼 생성
+        CreateStartBall(currentStageData.startBallCount);                      // 시작 볼 생성
 
-        objectContainer.StateSet(stageData);                            // 오브젝트 컨테이너에 스테이지 데이터 전달 및 스테이지 배치 
+        objectContainer.StateSet(currentStageData);                            // 오브젝트 컨테이너에 스테이지 데이터 전달 및 스테이지 배치 
 
         SetCameraTarget(startBox.transform);                            // 카메라 타겟 설정
 
     }
+
+    private void Result()
+    {
+        StartCoroutine(CoResult());
+    }
+
+    private IEnumerator CoResult()
+    {
+        yield return new WaitForSeconds(3f);
+        
+        OnOpenResultPage?.Invoke(currentStageData.goalScore <= stageScore);
+    }
+
+
+    
+
 }

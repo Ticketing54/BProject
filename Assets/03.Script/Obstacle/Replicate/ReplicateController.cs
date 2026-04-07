@@ -26,6 +26,16 @@ public class ReplicateController : MonoBehaviour
         }
     }
 
+    public void AddBoxList(ReplicateRange _range)
+    {
+        if (boxList.Contains(_range))
+            return;
+
+        boxList.Add(_range);
+        _range.Setup(ReplicateBall);
+
+    }
+
     private void ReplicateBall(Ball _ball, ReplicateRange _targetBox)
     {
         if (ignoreBall_HashSet.Contains(_ball))

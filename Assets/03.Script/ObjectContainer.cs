@@ -38,6 +38,9 @@ public class ObjectContainer : MonoBehaviour
     private void Awake()
     {
         Setup();
+
+        GameManager.Instance.ResetObject += ResetAllObject;
+        GameManager.Instance.ResetObject += ReleaseAllActiveBalls;
     }
 
     #region BALL
@@ -50,8 +53,6 @@ public class ObjectContainer : MonoBehaviour
             activeBall.Add(_ball);
         else
             Debug.LogError(_ball.name + " is already in activeBall set.");
-
-        _ball.gameObject.SetActive(true);
     }
 
     private void PoolDestroyBall(Ball _ball) => Destroy(_ball.gameObject);
@@ -60,6 +61,7 @@ public class ObjectContainer : MonoBehaviour
     {
         _ball.gameObject.transform.position = ballReleasePoint;
         _ball.gameObject.SetActive(false);
+        _ball.ConstraintsPositionZ(true);
 
         if (activeBall.Contains(_ball))
             activeBall.Remove(_ball);
@@ -114,6 +116,7 @@ public class ObjectContainer : MonoBehaviour
         Ball newBall = ballPool.Get();
 
         newBall.Move(_position);
+        newBall.gameObject.SetActive(true);
 
         return newBall;
     }
@@ -139,6 +142,8 @@ public class ObjectContainer : MonoBehaviour
         return activeBall.ToList();
 
     }
+
+    public int ActiveBallCount => activeBall.Count;
 
     public void ReleaseAllActiveBalls()
     {
@@ -168,8 +173,6 @@ public class ObjectContainer : MonoBehaviour
 
     public void StateSet(StageData _info)
     {
-        ResetAllObject();
-
         SetWallLength(_info.stageLength);
 
         foreach (ObstacleData data in _info.obstacleData)

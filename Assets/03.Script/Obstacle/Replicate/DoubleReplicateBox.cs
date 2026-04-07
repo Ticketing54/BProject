@@ -2,8 +2,9 @@ using UnityEngine;
 
 public class DoubleReplicateBox : MonoBehaviour, IObstacle
 {
-    [SerializeField] ReplicateRange leftRange;
-    [SerializeField] ReplicateRange rightRange;
+    [SerializeField] private ReplicateRange leftRange;
+    [SerializeField] private ReplicateRange rightRange;
+
     [SerializeField][Range(0.1f, 1)] private float ratio = 0.5f;
     [SerializeField][Range(1, 10)] private int leftCount = 1;
     [SerializeField][Range(1, 10)] private int rightCount = 1;

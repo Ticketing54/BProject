@@ -19,12 +19,6 @@ public class Spawner : MonoBehaviour
         {
             StartCoroutine(CoSpawnBall());
         }
-
-        if (Input.GetKeyDown(KeyCode.S))
-        {
-            gameManager.ClearAllBalls();
-         
-        }
     }
 
     private IEnumerator CoSpawnBall()

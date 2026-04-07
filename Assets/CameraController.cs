@@ -22,7 +22,7 @@ public class CameraController : MonoBehaviour
 
     private float startPostionY = 0;
     private const float endPostionY = -15;
-
+    public float aa = 5;
     private void Start()
     {
         offset = transform.position;
@@ -40,9 +40,10 @@ public class CameraController : MonoBehaviour
     {
         while (true)
         {
-            if (target != null)
+            if (target != null && target.gameObject.activeSelf)
             {   
                 offset.y = target.transform.position.y;
+                offset.y = Mathf.Lerp(transform.position.y, offset.y, Time.deltaTime * aa);
                 transform.position = offset;
             }
 
@@ -54,6 +55,9 @@ public class CameraController : MonoBehaviour
 
     public void SetOpeningData(float _length)
     {
+        if(cameraRoutine != null)
+            StopCoroutine(cameraRoutine);
+
         startPostionY = _length - 5;
         transform.position = new Vector3(transform.position.x, endPostionY, transform.position.z);
     }
@@ -67,25 +71,25 @@ public class CameraController : MonoBehaviour
     }
     IEnumerator AnimateCamera(Action _callback)
     {
-        Debug.Log("AnimateCamera started");
         float duration = animationDuration;
         float elapsed = 0;
 
         Vector3 animationStartPosition = new Vector3(transform.position.x, endPostionY, transform.position.z);
         Vector3 animationEndPosition = new Vector3(transform.position.x, startPostionY, transform.position.z);
 
-        transform.position = animationStartPosition;
-
         while (elapsed < duration)
         {
             transform.position = Vector3.Lerp(animationStartPosition, animationEndPosition, elapsed / duration);
             elapsed += Time.deltaTime;
             yield return null;
+            continue;
         }
 
         transform.position = animationEndPosition;
 
         LookAtTarget();
+
+        _callback?.Invoke();
     }
 
     #endregion

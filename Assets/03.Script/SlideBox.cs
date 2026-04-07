@@ -1,114 +1,204 @@
-using UnityEditor;
+using DG.Tweening;
+using System.Collections.Generic;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class SlideBox : MonoBehaviour
 {
-    [Header("BoxData")]
-    [SerializeField] private ReplicateRange prefab;
-    [SerializeField] private float moveSpeed = 0.1f;
-    [Range(0, 1)][SerializeField] private float ratio;
+    [SerializeField] ReplicateRange leftRange;
+    [SerializeField] ReplicateRange rightRange;
+    [SerializeField][Range(0.1f, 1)] private float ratio = 0.5f;
+    [SerializeField][Range(1, 10)] private int leftCount = 1;
+    [SerializeField][Range(1, 10)] private int rightCount = 1;
 
-    private ReplicateRange leftBox;
-    private ReplicateRange rightBox;
-    private ReplicateRange tempBox;
-    private float leftOriginX;
-    private float rightOriginX;
+    [SerializeField] private DataBundle.BallColor leftTargetColor;
+    [SerializeField] private DataBundle.BallColor righTargetColor;
 
-    private Transform SlideBoxTransform => this.transform;
-    private Vector3 GetLocalXScale(float _x) => new Vector3(_x, 1, 1);
+    [Header("Move Data")]
+    [SerializeField] private bool isMoveLeft = true;
+    [SerializeField] private float moveSpeed = 1f;
 
+
+    private List<ReplicateRange> moveBoxList = new List<ReplicateRange>();
+    private Vector3 moveDirection => isMoveLeft ? Vector3.left : Vector3.right;
+    
     private void Awake()
     {
         Setup();
     }
 
+    private void OnValidate()
+    {
+        if (Application.isPlaying)
+            return;
+
+        UpdateData();
+    }
+
+
     private void Update()
     {
-        UpdateScale();
-    }
+        if (moveBoxList.Count == 0)
+            return;
 
-    private void UpdatePositionFromScale()
-    {
-        Vector3 position = Vector3.zero;
+        if (moveBoxList == null || moveBoxList.Count == 0) return;
 
-        position.x = leftBox.transform.localScale.x * 0.5f - 0.5f;
-        leftBox.transform.localPosition = position;
+        // 1. 0번 박스(리더)만 직접 이동
+        moveBoxList[0].transform.Translate(moveDirection * moveSpeed * Time.deltaTime);
 
-        position = leftBox.transform.localPosition;
-        position.x += leftBox.transform.localScale.x * 0.5f + rightBox.transform.localScale.x * 0.5f;
-        rightBox.transform.localPosition = position;
-
-        position = rightBox.transform.localPosition;
-        position.x += rightBox.transform.localScale.x * 0.5f + tempBox.transform.localScale.x * 0.5f;
-        tempBox.transform.localPosition = position;
-    }
-
-    private void UpdateScale()
-    {
-        if (leftBox.transform.localScale.x <= 0)
+        // 2. 1번부터 마지막까지 앞 박스를 기준으로 위치 고정
+        // 로컬 좌표계에서 박스의 '절반 너비'를 활용해 딱 붙입니다.
+        for (int i = 1; i < moveBoxList.Count; i++)
         {
-            GameObject destroyBox = leftBox.gameObject;
-            leftBox = rightBox;
-            rightBox = tempBox;
-            tempBox = GameObject.Instantiate<ReplicateRange>(leftBox);
-            Destroy(destroyBox);
+            Transform prev = moveBoxList[i - 1].transform;
+            Transform curr = moveBoxList[i].transform;
 
-            tempBox.transform.SetParent(SlideBoxTransform);
-            tempBox.transform.localScale = GetLocalXScale(0);
+            // 앞 박스의 중심점 + (앞 박스 너비의 절반) + (내 너비의 절반)
+            float prevHalfWidth = prev.localScale.x * 0.5f;
+            float currHalfWidth = curr.localScale.x * 0.5f;
 
-            float temp = leftOriginX;
-            leftOriginX = rightOriginX;
-            rightOriginX = temp;
+            Vector3 newPos = curr.localPosition;
+
+            if (isMoveLeft)
+            {
+                // 왼쪽 이동 시: 내 위치는 앞 박스의 오른쪽(+)에 붙어야 함
+                newPos.x = prev.localPosition.x + prevHalfWidth + currHalfWidth;
+            }
+            else
+            {
+                // 오른쪽 이동 시: 내 위치는 앞 박스의 왼쪽(-)에 붙어야 함
+                newPos.x = prev.localPosition.x - prevHalfWidth - currHalfWidth;
+            }
+
+            curr.localPosition = newPos;
         }
 
-        Vector3 leftBoxScale = leftBox.transform.localScale;
-        leftBoxScale.x -= moveSpeed * Time.deltaTime;
-        leftBoxScale.x = leftBoxScale.x < 0 ? 0 : leftBoxScale.x;
-        leftBox.transform.localScale = leftBoxScale;
-
-        float tempX = leftOriginX - leftBoxScale.x;
-        leftBoxScale.x = tempX;
-        tempBox.transform.localScale = leftBoxScale;
-
-        UpdatePositionFromScale();
+        // 3. 경계 체크 및 순환
+        if (HasReachedBoundary(moveBoxList[0]))
+        {
+            RelayBox();
+        }
     }
+
+    private bool HasReachedBoundary(ReplicateRange _box)
+    {
+        float boundary = isMoveLeft ? -0.5f : 0.5f;
+        float offset = isMoveLeft ? -_box.transform.localScale.x : _box.transform.localScale.x;
+        offset *= 0.5f;
+        boundary += offset;
+
+        if (isMoveLeft)
+            return boundary >= _box.transform.localPosition.x;
+
+        return boundary <= _box.transform.localPosition.x;
+    }
+
+    private void RelayBox()
+    {
+        if (moveBoxList == null || moveBoxList.Count < 2) return;
+
+        ReplicateRange frontBox = moveBoxList[0];
+        moveBoxList.RemoveAt(0);
+
+        moveBoxList.Add(frontBox);
+
+        Vector3 farPos = frontBox.transform.localPosition;
+
+        float teleportOffset = 2.0f;
+        farPos.x = isMoveLeft ? teleportOffset : -teleportOffset;
+
+        frontBox.transform.localPosition = farPos;
+
+        Debug.Log($"{frontBox.name} 순환 완료. 다음 프레임에서 정렬됩니다.");
+    }
+
 
     private void Setup()
     {
-        leftBox = GameObject.Instantiate<ReplicateRange>(prefab);
-        leftBox.transform.SetParent(SlideBoxTransform);
-        leftBox.transform.localScale = GetLocalXScale(ratio);
-        leftOriginX = leftBox.transform.localScale.x;
+        if(leftRange == null ||  rightRange == null)
+        {
+            Debug.LogError("Range등록 필요");
+            return;
+        }
 
-        rightBox = GameObject.Instantiate<ReplicateRange>(prefab);
-        rightBox.transform.SetParent(SlideBoxTransform);
-        rightBox.transform.localScale = GetLocalXScale((1 - ratio));
-        rightOriginX = rightBox.transform.localScale.x;
+        ReplicateRange replicateRange_Left = GameObject.Instantiate(leftRange,this.transform);
+        ReplicateRange replicateRange_Right = GameObject.Instantiate(rightRange, this.transform);
 
-        tempBox = GameObject.Instantiate<ReplicateRange>(leftBox);
-        tempBox.transform.SetParent(SlideBoxTransform);
-        tempBox.transform.localScale = GetLocalXScale(0);
+        if(TryGetComponent<ReplicateController>(out ReplicateController controller))
+        {
+            controller.AddBoxList(replicateRange_Right);
+            controller.AddBoxList(replicateRange_Left);
+        }
 
-        UpdatePositionFromScale();
+        ReplicateRange[] originPair = isMoveLeft ? 
+            new[] { leftRange, rightRange } : new[] { rightRange, leftRange };
+        ReplicateRange[] instantiatePair = isMoveLeft ? 
+            new[] { replicateRange_Left, replicateRange_Right } : new[] { replicateRange_Right, replicateRange_Left };
+
+        moveBoxList.AddRange(originPair);
+        moveBoxList.AddRange(instantiatePair);
+        
     }
 
-#if UNITY_EDITOR
-
-    private void OnDrawGizmos()
+    private void UpdateData()
     {
-        if (SlideBoxTransform == null)
+        if (leftRange == null)
             return;
 
-        Vector3 leftBoxPosition = SlideBoxTransform.position;
-        leftBoxPosition.x = SlideBoxTransform.position.x - SlideBoxTransform.lossyScale.x * 0.5f + SlideBoxTransform.transform.lossyScale.x * ratio * 0.5f;
-        Vector3 rightBoxPosition = SlideBoxTransform.position;
-        rightBoxPosition.x = SlideBoxTransform.position.x + SlideBoxTransform.lossyScale.x * 0.5f - SlideBoxTransform.transform.lossyScale.x * (1-ratio) * 0.5f;
-        Gizmos.color = Color.blue;
-        Gizmos.DrawWireCube(leftBoxPosition, new Vector3(SlideBoxTransform.transform.lossyScale.x * ratio,SlideBoxTransform.lossyScale.y, SlideBoxTransform.lossyScale.z));
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireCube(rightBoxPosition, new Vector3(SlideBoxTransform.transform.lossyScale.x * (1-ratio),SlideBoxTransform.lossyScale.y, SlideBoxTransform.lossyScale.z));
+        leftRange.UpdateData(leftTargetColor, leftCount);
+        rightRange.UpdateData(righTargetColor, rightCount);
+
+
+        leftRange.transform.localScale = new Vector3(ratio, 1f, 1f);
+        rightRange.transform.localScale = new Vector3(1f - ratio, 1f, 1f);
+
+        float leftPosX = -0.5f + (ratio * 0.5f);
+        leftRange.transform.localPosition = new Vector3(leftPosX, 0f, 0f);
+
+
+        float rightPosX = 0.5f - ((1f - ratio) * 0.5f);
+        rightRange.transform.localPosition = new Vector3(rightPosX, 0f, 0f);
+
+
     }
 
-#endif
+    private void Setup(DubbleDuplicateBox _data)
+    {
+        transform.position = _data.position;
+        transform.rotation = _data.rotation;
+        transform.localScale = _data.scale;
 
+        leftTargetColor = _data.left_TargetColor;
+        righTargetColor = _data.rightTargetColor;
+
+        leftCount = _data.leftCount;
+        rightCount = _data.rightCount;
+
+        UpdateData();
+    }
+
+    public void ApplyData(ObstacleData data)
+    {
+        if (data is DubbleDuplicateBox == false)
+            return;
+
+        Setup(data as DubbleDuplicateBox);
+    }
+
+    public ObstacleData GetObstacleData()
+    {
+        DubbleDuplicateBox data = new DubbleDuplicateBox();
+        data.prefabtype = DataBundle.ObstacleType.DOUBLE_DUPLICATION_BOX;
+        data.position = transform.position;
+        data.rotation = transform.rotation;
+        data.scale = transform.localScale;
+        data.leftCount = leftCount;
+        data.rightCount = rightCount;
+        data.left_TargetColor = leftTargetColor;
+        data.rightTargetColor = righTargetColor;
+        data.leftCount = leftCount;
+        data.rightCount = rightCount;
+        data.ratio = ratio;
+        return data;
+    }
 }

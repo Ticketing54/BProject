@@ -25,34 +25,56 @@ public class UIManager : MonoBehaviour
 
     private void OnEnable()
     {
-        GameManager.Instance.OnScoreChanged += UpdateScoreUI;
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.OnScoreChanged += UpdateScoreUI;
+            GameManager.Instance.OnOpenResultPage += OpenResultPage;
+            GameManager.Instance.OnFadeInRequest += StartFadeIn;
+            GameManager.Instance.OnFadeOutRequest += StartFadeOut;
+            GameManager.Instance.ResetObject += ScoreBoadReset;
+        }
     }
 
     private void OnDisable()
     {
-        GameManager.Instance.OnScoreChanged -= UpdateScoreUI;
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.OnScoreChanged -= UpdateScoreUI;
+            GameManager.Instance.OnOpenResultPage -= OpenResultPage;
+            GameManager.Instance.OnFadeInRequest -= StartFadeIn;
+            GameManager.Instance.OnFadeOutRequest -= StartFadeOut;
+            GameManager.Instance.ResetObject -= ScoreBoadReset;
+        }
     }
 
     #region Score
-    public void UpdateScoreUI(int _score)
+
+    private void ScoreBoadReset()
     {
-        score_TextMeshProUGUI.text = _score.ToString();
+        score_TextMeshProUGUI.text = string.Empty;
+    }
+
+    public void UpdateScoreUI(int _score, int _goalScore)
+    {
+        string goalMessage = _score + " / " + _goalScore;
+
+        score_TextMeshProUGUI.text = goalMessage;
     }
 
 
     public void OnClick_RetryButton()
     {
         end_CanvasGroup.gameObject.SetActive(false);
-        Onclick_Retry?.Invoke();
+        GameManager.Instance.NextStage(false);
     }
 
     public void OnClick_NextStageButton()
     {
         end_CanvasGroup.gameObject.SetActive(false);
-        OnClick_NextStage?.Invoke();
+        GameManager.Instance.NextStage(true);
     }
 
-    public void OpenEndUI(bool _isNext)
+    public void OpenResultPage(bool _isNext)
     {
         StartCoroutine(CoOpoenScoreUI(_isNext));
     }
@@ -60,7 +82,6 @@ public class UIManager : MonoBehaviour
     private IEnumerator CoOpoenScoreUI(bool _isNext)
     {
         next_Button.interactable = _isNext;
-
         end_CanvasGroup.alpha = 0;
         end_CanvasGroup.gameObject.SetActive(true);
 

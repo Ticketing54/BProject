@@ -1,5 +1,7 @@
 using DG.Tweening;
+using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public class StartBox : MonoBehaviour
@@ -14,8 +16,7 @@ public class StartBox : MonoBehaviour
     [Header("Move")]
     [SerializeField] private float moveSpeed = 0.01f;
 
-    [Header("Start Data")]
-    [SerializeField] private int ballCount;
+    [Header("Start Position Data")]
     [SerializeField] private List<Transform> startPosition;
 
 
@@ -23,8 +24,9 @@ public class StartBox : MonoBehaviour
 
     private Sequence closeBoxAnimation;
     private Sequence dropBoxAnimation;
-    private bool isRotate = false;
     private GameManager gameManager => GameManager.Instance;
+    private Coroutine moveBox_routine;
+    private int ballCount = 0;
 
     #region BoxAnimation
 
@@ -36,79 +38,62 @@ public class StartBox : MonoBehaviour
             .Append(frontBoxWing.DOLocalRotate(new Vector3(0, 0, 0), 0.5f)).SetUpdate(UpdateType.Fixed)
             .Join(backBoxWing.DOLocalRotate(new Vector3(180f, 0f, 0f), 0.5f)).SetUpdate(UpdateType.Fixed)
             .Append(boxBody.DOLocalRotate(new Vector3(0, 0, -180), 0.5f)).SetUpdate(UpdateType.Fixed)
-            .AppendCallback(() => isRotate = !isRotate);                         // Animation End
+            .AppendCallback(StartMoveBox);                         // Animation End
     }
 
     private void SetupDropAnimation()
     {
         dropBoxAnimation = DOTween.Sequence().SetAutoKill(false)
+            .AppendCallback(ReleaseInput)
             .Append(leftBoxWing.DOLocalRotate(new Vector3(90f, 0f, 45f), 1)).SetUpdate(UpdateType.Fixed)
             .Join(rightBoxWing.DOLocalRotate(new Vector3(90f, 0f, -45f), 1)).SetUpdate(UpdateType.Fixed)
             .Join(frontBoxWing.DOLocalRotate(new Vector3(130f, 0, 0), 1)).SetUpdate(UpdateType.Fixed)
             .Join(backBoxWing.DOLocalRotate(new Vector3(45f, 0f, 0f), 1)).SetUpdate(UpdateType.Fixed)
-            .AppendCallback(RealeaseInput)
-            .AppendCallback(() => gameManager.SetCameraTarget(null));                         // Animation End
+            .AppendCallback(AnimationEnd);                         // Animation End
 
     }
 
 
     private void CloseBoxAnimation() => closeBoxAnimation.PlayForward();
-    private void CancleBoxAnimation() => closeBoxAnimation.PlayBackwards();
+    private void CancelBoxAnimation() => closeBoxAnimation.PlayBackwards();
     private void DropBoxAnimation() => dropBoxAnimation.PlayForward();
 
     #endregion
 
     void Start()
     {
-        // Input Setup
-        RegisterInput();
-
         // Animation Setup
         SetupCloseAnimation();
         SetupDropAnimation();
+
+        gameManager.ResetObject += ResetObject;
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if(other.TryGetComponent<Ball>(out Ball ball))
+        {
+            ballCount++;
+            if(GameManager.Instance.IsAllBallsEntered(ballCount))
+            {
+                RegisterInput();
+            }
+        }
     }
 
     private void RegisterInput()
     {
         gameManager.InputClickDown += OnClickDown;
         gameManager.InputClickUp += OnClickUp;
+
+        if (moveBox_routine != null)
+            StopCoroutine(moveBox_routine);
     }
 
-    private void RealeaseInput()
+    private void ReleaseInput()
     {
         gameManager.InputClickDown -= OnClickDown;
         gameManager.InputClickUp -= OnClickUp;
-    }
-    private void FixedUpdate()
-    {
-        if (!isRotate)
-            return;
-
-        MoveBox(gameManager.Direction);
-    }
-
-    private void OnClickDown() => CloseBoxAnimation();
-
-    private void OnClickUp()
-    {
-        if (isRotate)
-            DropBoxAnimation();
-        else
-            CancleBoxAnimation();
-    }
-
-    private void MoveBox(Vector2 _direction)
-    {
-        if (!isRotate)
-            return;
-
-        if (Mathf.Abs(_direction.x) < 0.1f)
-            return;
-
-        //transform.position += new Vector3(_direction.x * moveSpeed, 0, 0);
-        Vector3 destination = transform.position + new Vector3(_direction.x * moveSpeed, 0, 0);
-        rig.MovePosition(destination);
-
     }
 
     public void SetStartPosition(float _stateLength)
@@ -137,4 +122,63 @@ public class StartBox : MonoBehaviour
 
         return shuffledPositions;
     }
+
+
+    private void StartMoveBox()
+    {
+        if (moveBox_routine != null)
+            StopCoroutine(moveBox_routine);
+
+        moveBox_routine = StartCoroutine(CoMoveBox());
+    }
+
+    private void AnimationEnd()
+    {
+        gameManager.SetCameraTarget(null);
+
+        if(moveBox_routine != null)
+            StopCoroutine (moveBox_routine);
+    }
+
+    private IEnumerator CoMoveBox()
+    {
+        WaitForFixedUpdate waitForFixedUpdate = new WaitForFixedUpdate();
+        while(true)
+        {
+            Vector2 direction = gameManager.Direction;
+
+            if (Mathf.Abs(direction.x) < 0.1f)
+            {
+                yield return waitForFixedUpdate;
+                continue;
+            }
+
+            Vector3 destination = transform.position + new Vector3(direction.x * moveSpeed, 0, 0);
+            destination.x = Mathf.Clamp(destination.x, -3.3f, 3.3f);
+            rig.MovePosition(destination);
+
+            yield return waitForFixedUpdate;
+        }
+    }
+
+    private void ResetObject()
+    {
+        dropBoxAnimation.Rewind();
+        closeBoxAnimation.Rewind();
+
+
+        RegisterInput();
+    }
+    
+
+    private void OnClickDown() => CloseBoxAnimation();
+
+    private void OnClickUp()
+    {
+        if (moveBox_routine != null)
+            DropBoxAnimation();
+        else
+            CancelBoxAnimation();
+    }
+
 }

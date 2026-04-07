@@ -46,7 +46,8 @@ public static class DataBundle
         SLANTEDWALL,
         SINGLE_DUPLICATION_BOX,
         DOUBLE_DUPLICATION_BOX,
-        WALL
+        WALL,
+        SLIDE_BOX,
     }
     #endregion
 }
