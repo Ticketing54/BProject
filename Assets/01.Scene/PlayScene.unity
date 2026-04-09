@@ -1925,6 +1925,34 @@ PrefabInstance:
       propertyPath: m_Name
       value: GameManager
       objectReference: {fileID: 0}
+    - target: {fileID: 8615655902002769833, guid: bc2392961d61d254daeac5b56c6198e5, type: 3}
+      propertyPath: levelData.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8615655902002769833, guid: bc2392961d61d254daeac5b56c6198e5, type: 3}
+      propertyPath: levelData.Array.data[1].level
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8615655902002769833, guid: bc2392961d61d254daeac5b56c6198e5, type: 3}
+      propertyPath: levelData.Array.data[0].stageDataArray.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8615655902002769833, guid: bc2392961d61d254daeac5b56c6198e5, type: 3}
+      propertyPath: levelData.Array.data[1].stageDataArray.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8615655902002769833, guid: bc2392961d61d254daeac5b56c6198e5, type: 3}
+      propertyPath: 'levelData.Array.data[0].stageDataArray.Array.data[0]'
+      value: 
+      objectReference: {fileID: 11400000, guid: d2090c364c35d134fa182158b0d4406c, type: 2}
+    - target: {fileID: 8615655902002769833, guid: bc2392961d61d254daeac5b56c6198e5, type: 3}
+      propertyPath: 'levelData.Array.data[0].stageDataArray.Array.data[1]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 13c104759cc8dac4099381ba9a1e4f48, type: 2}
+    - target: {fileID: 8615655902002769833, guid: bc2392961d61d254daeac5b56c6198e5, type: 3}
+      propertyPath: 'levelData.Array.data[1].stageDataArray.Array.data[0]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 9602175f350ca784d97ed718b02038a3, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

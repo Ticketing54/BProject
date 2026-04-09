@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 
@@ -79,7 +80,7 @@ public class GameManager : MonoBehaviour
     public event Action<bool> OnOpenResultPage;
     public event Action ResetObject;
     public event Action<bool> OnBlockInput;
-
+    public event Action EditorExit;
     private void Awake()
     {
         if (objectContainer == null)
@@ -99,7 +100,7 @@ public class GameManager : MonoBehaviour
 
         ChangeGameState(eGameState.Intro);
     }
-
+    public void SetTestStage(StageData _stageData) => currentStageData = _stageData;
     public bool IsAllBallsEntered(int _count) => _count >= objectContainer.ActiveBallCount;
 
     public void SetScore(int _score)
@@ -115,13 +116,7 @@ public class GameManager : MonoBehaviour
     {
         return stageScore.ToString();
     }
-    private void SetTargetToEndBox(int _score,int _goalScore)
-    {
-        if (_score == 1)
-        {
-            camearaTarget = endBox.transform;
-        }
-    }
+    
     #region Camera
 
     private Transform camearaTarget;
@@ -209,7 +204,8 @@ public class GameManager : MonoBehaviour
 
     public void NextStage(bool _isRestart)
     {
-        //playLevel = _isRestart ? playLevel : playLevel + 1;
+        // 추후 수정
+        PlayerPrefs.SetInt(currentStageData.name, 1);
         ChangeGameState(eGameState.Ready);
     }
 
@@ -235,7 +231,7 @@ public class GameManager : MonoBehaviour
 
                 ResetObject?.Invoke();
 
-                currentStageData = stageContainer.GetStageData(playLevel);
+                currentStageData = stageContainer.GetStageData();
 
                 startBox.SetStartPosition(currentStageData.stageLength);
 
@@ -260,6 +256,14 @@ public class GameManager : MonoBehaviour
                 // 입력 활성화
                 break;
             case eGameState.Result:
+#if UNITY_EDITOR
+                if (isTestMode)
+                {
+                    EditorExit?.Invoke();
+                    return;
+                }
+#endif
+
                 OnBlockInput?.Invoke(true);
                 Result();
                 break;
@@ -275,7 +279,7 @@ public class GameManager : MonoBehaviour
     {
         playLevel = PlayerPrefs.GetInt("PlayerLevel", 1);               //  플레이어 레벨 불러오기 (기본값 1)
 
-        currentStageData = stageContainer.GetStageData(playLevel);   // 스테이지 데이터 불러오기
+        currentStageData = stageContainer.GetStageData();   // 스테이지 데이터 불러오기
 
         startBox.SetStartPosition(currentStageData.stageLength);               // 스타트 박스 위치 설정
 

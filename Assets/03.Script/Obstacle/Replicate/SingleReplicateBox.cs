@@ -22,7 +22,7 @@ public class SingleReplicateBox : MonoBehaviour, IObstacle
         replicateRange.UpdateData(targetColor, count);
     }
 
-    private void Setup(SingleDuplicationBox _data)
+    private void Setup(SingleDuplicationBoxData _data)
     {
         count = _data.count;
 
@@ -35,15 +35,15 @@ public class SingleReplicateBox : MonoBehaviour, IObstacle
 
     public void ApplyData(ObstacleData data)
     {
-        if (data is SingleDuplicationBox == false)
+        if (data is SingleDuplicationBoxData == false)
             return;
 
-        Setup(data as SingleDuplicationBox);
+        Setup(data as SingleDuplicationBoxData);
     }
 
     public ObstacleData GetObstacleData()
     {
-        SingleDuplicationBox data = new SingleDuplicationBox();
+        SingleDuplicationBoxData data = new SingleDuplicationBoxData();
         data.prefabtype = DataBundle.ObstacleType.SINGLE_DUPLICATION_BOX;
         data.position = transform.position;
         data.rotation = transform.rotation;

@@ -1,0 +1,107 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c8897b914465ca44eaca45ab26df24af, type: 3}
+  m_Name: Stage2_1
+  m_EditorClassIdentifier: Assembly-CSharp::StageData
+  stagesLvel: 2
+  stageLength: 70
+  goalScore: 100
+  startBallCount: 3
+  obstacleData:
+  - rid: 8228905739973558272
+  - rid: 8228905739973558273
+  - rid: 8228905739973558274
+  - rid: 8228905739973558275
+  - rid: 8228905739973558276
+  - rid: 8228905739973558277
+  - rid: 8228905739973558278
+  - rid: 8228905739973558279
+  references:
+    version: 2
+    RefIds:
+    - rid: 8228905739973558272
+      type: {class: DubbleDuplicateBoxData, ns: , asm: Assembly-CSharp}
+      data:
+        prefabtype: 3
+        position: {x: 0, y: 13.2, z: 0}
+        rotation: {x: 0, y: 0, z: 0, w: 1}
+        scale: {x: 9, y: 0.5, z: 3}
+        leftCount: 2
+        rightCount: 4
+        left_TargetColor: 0
+        rightTargetColor: 1
+        ratio: 0.5
+    - rid: 8228905739973558273
+      type: {class: StaticObstacleData, ns: , asm: Assembly-CSharp}
+      data:
+        prefabtype: 1
+        position: {x: 1.85, y: 60.6, z: 0}
+        rotation: {x: 0, y: 0, z: -0.5, w: 0.8660254}
+        scale: {x: 1, y: 7.11, z: 3}
+    - rid: 8228905739973558274
+      type: {class: StaticObstacleData, ns: , asm: Assembly-CSharp}
+      data:
+        prefabtype: 1
+        position: {x: -2.71, y: 53.969997, z: 0}
+        rotation: {x: 0, y: 0, z: 0.5, w: 0.8660254}
+        scale: {x: 1, y: 5, z: 3}
+    - rid: 8228905739973558275
+      type: {class: SlideBoxData, ns: , asm: Assembly-CSharp}
+      data:
+        prefabtype: 3
+        position: {x: 0, y: 48.699997, z: 0}
+        rotation: {x: 0, y: 0, z: 0, w: 1}
+        scale: {x: 9, y: 0.5, z: 3}
+        isMoveLeft: 0
+        moveSpeed: 5
+        leftCount: 2
+        rightCount: 5
+        left_TargetColor: 0
+        rightTargetColor: 1
+        ratio: 0.5
+    - rid: 8228905739973558276
+      type: {class: SlideBoxData, ns: , asm: Assembly-CSharp}
+      data:
+        prefabtype: 3
+        position: {x: 0, y: 24.2, z: 0}
+        rotation: {x: 0, y: 0, z: 0, w: 1}
+        scale: {x: 9, y: 0.5, z: 3}
+        isMoveLeft: 1
+        moveSpeed: 6
+        leftCount: 1
+        rightCount: 5
+        left_TargetColor: 0
+        rightTargetColor: 1
+        ratio: 0.5
+    - rid: 8228905739973558277
+      type: {class: StaticObstacleData, ns: , asm: Assembly-CSharp}
+      data:
+        prefabtype: 1
+        position: {x: -2.71, y: 32.929996, z: 0}
+        rotation: {x: 0, y: 0, z: 0.5, w: 0.8660254}
+        scale: {x: 1, y: 5, z: 3}
+    - rid: 8228905739973558278
+      type: {class: SingleDuplicationBoxData, ns: , asm: Assembly-CSharp}
+      data:
+        prefabtype: 2
+        position: {x: 0, y: 39.399998, z: 0}
+        rotation: {x: 0, y: 0, z: 0, w: 1}
+        scale: {x: 9, y: 0.5, z: 3}
+        count: 3
+        targetColor: 0
+    - rid: 8228905739973558279
+      type: {class: StaticObstacleData, ns: , asm: Assembly-CSharp}
+      data:
+        prefabtype: 1
+        position: {x: 2.79, y: 44.379997, z: 0}
+        rotation: {x: 0, y: 0, z: -0.5, w: 0.8660254}
+        scale: {x: 1, y: 5, z: 3}

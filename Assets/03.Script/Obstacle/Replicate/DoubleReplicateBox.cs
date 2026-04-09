@@ -43,7 +43,7 @@ public class DoubleReplicateBox : MonoBehaviour, IObstacle
 
     }
 
-    private void Setup(DubbleDuplicateBox _data)
+    private void Setup(DubbleDuplicateBoxData _data)
     {
         transform.position = _data.position;
         transform.rotation = _data.rotation;
@@ -60,15 +60,15 @@ public class DoubleReplicateBox : MonoBehaviour, IObstacle
 
     public void ApplyData(ObstacleData data)
     {
-        if (data is DubbleDuplicateBox == false)
+        if (data is DubbleDuplicateBoxData == false)
             return;
 
-        Setup(data as DubbleDuplicateBox);
+        Setup(data as DubbleDuplicateBoxData);
     }
 
     public ObstacleData GetObstacleData()
     {
-        DubbleDuplicateBox data = new DubbleDuplicateBox();
+        DubbleDuplicateBoxData data = new DubbleDuplicateBoxData();
         data.prefabtype = DataBundle.ObstacleType.DOUBLE_DUPLICATION_BOX;
         data.position = transform.position;
         data.rotation = transform.rotation;

@@ -1,9 +1,7 @@
-using DG.Tweening;
 using System.Collections.Generic;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
-public class SlideBox : MonoBehaviour
+public class SlideBox : MonoBehaviour, IObstacle
 {
     [SerializeField] ReplicateRange leftRange;
     [SerializeField] ReplicateRange rightRange;
@@ -21,7 +19,7 @@ public class SlideBox : MonoBehaviour
 
     private List<ReplicateRange> moveBoxList = new List<ReplicateRange>();
     private Vector3 moveDirection => isMoveLeft ? Vector3.left : Vector3.right;
-    
+
     private void Awake()
     {
         Setup();
@@ -108,36 +106,34 @@ public class SlideBox : MonoBehaviour
         farPos.x = isMoveLeft ? teleportOffset : -teleportOffset;
 
         frontBox.transform.localPosition = farPos;
-
-        Debug.Log($"{frontBox.name} 순환 완료. 다음 프레임에서 정렬됩니다.");
     }
 
 
     private void Setup()
     {
-        if(leftRange == null ||  rightRange == null)
+        if (leftRange == null || rightRange == null)
         {
             Debug.LogError("Range등록 필요");
             return;
         }
 
-        ReplicateRange replicateRange_Left = GameObject.Instantiate(leftRange,this.transform);
+        ReplicateRange replicateRange_Left = GameObject.Instantiate(leftRange, this.transform);
         ReplicateRange replicateRange_Right = GameObject.Instantiate(rightRange, this.transform);
 
-        if(TryGetComponent<ReplicateController>(out ReplicateController controller))
+        if (TryGetComponent<ReplicateController>(out ReplicateController controller))
         {
             controller.AddBoxList(replicateRange_Right);
             controller.AddBoxList(replicateRange_Left);
         }
 
-        ReplicateRange[] originPair = isMoveLeft ? 
+        ReplicateRange[] originPair = isMoveLeft ?
             new[] { leftRange, rightRange } : new[] { rightRange, leftRange };
-        ReplicateRange[] instantiatePair = isMoveLeft ? 
+        ReplicateRange[] instantiatePair = isMoveLeft ?
             new[] { replicateRange_Left, replicateRange_Right } : new[] { replicateRange_Right, replicateRange_Left };
 
         moveBoxList.AddRange(originPair);
         moveBoxList.AddRange(instantiatePair);
-        
+
     }
 
     private void UpdateData()
@@ -162,7 +158,7 @@ public class SlideBox : MonoBehaviour
 
     }
 
-    private void Setup(DubbleDuplicateBox _data)
+    private void Setup(SlideBoxData _data)
     {
         transform.position = _data.position;
         transform.rotation = _data.rotation;
@@ -174,20 +170,23 @@ public class SlideBox : MonoBehaviour
         leftCount = _data.leftCount;
         rightCount = _data.rightCount;
 
+        isMoveLeft = _data.isMoveLeft;
+        moveSpeed = _data.moveSpeed;
+
         UpdateData();
     }
 
     public void ApplyData(ObstacleData data)
     {
-        if (data is DubbleDuplicateBox == false)
+        if (data is DubbleDuplicateBoxData == false)
             return;
 
-        Setup(data as DubbleDuplicateBox);
+        Setup(data as SlideBoxData);
     }
 
     public ObstacleData GetObstacleData()
     {
-        DubbleDuplicateBox data = new DubbleDuplicateBox();
+        SlideBoxData data = new SlideBoxData();
         data.prefabtype = DataBundle.ObstacleType.DOUBLE_DUPLICATION_BOX;
         data.position = transform.position;
         data.rotation = transform.rotation;
@@ -199,6 +198,8 @@ public class SlideBox : MonoBehaviour
         data.leftCount = leftCount;
         data.rightCount = rightCount;
         data.ratio = ratio;
+        data.isMoveLeft = isMoveLeft;
+        data.moveSpeed = moveSpeed;
         return data;
     }
 }

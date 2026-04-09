@@ -47,7 +47,8 @@ public static class DataBundle
         SINGLE_DUPLICATION_BOX,
         DOUBLE_DUPLICATION_BOX,
         WALL,
-        SLIDE_BOX,
+        SLIDE_BOX
+
     }
     #endregion
 }

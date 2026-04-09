@@ -1,6 +1,6 @@
-using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 
 public class StageContainer : MonoBehaviour
@@ -13,20 +13,42 @@ public class StageContainer : MonoBehaviour
     }
 
     [SerializeField] private StageGroup[] levelData;
-    
 
-    public StageData GetStageData(int level)
+    private Dictionary<string, StageData> stageData_Dictionary = new Dictionary<string, StageData>();
+    private List<string> keyList = new List<string>();
+
+    private void Start()
     {
-        StageGroup stageGroup = Array.Find(levelData, group => group.level == level);
-
-        if (stageGroup != null)
+        foreach (var group in levelData)
         {
-            return stageGroup.stageDataArray[UnityEngine.Random.Range(0, stageGroup.stageDataArray.Length)];
-        }
-        else
-        {
-            Debug.LogError($"Stage data for level {level} not found.");
-            return null;
+            foreach (var data in group.stageDataArray)
+            {
+                keyList.Add(data.name);
+                stageData_Dictionary.Add(data.name, data);
+            }
         }
     }
+
+
+
+
+    public StageData GetStageData()
+    {
+        foreach (string key in keyList)
+        {
+            int isCleared = PlayerPrefs.GetInt(key, 0); // 추후 수정
+
+            if (isCleared == 0)
+            {
+                return stageData_Dictionary[key];
+            }
+        }
+
+        // AllClear 
+
+        int randomIndex = UnityEngine.Random.Range(0, keyList.Count);
+
+        return stageData_Dictionary[keyList[randomIndex]];
+    }
+
 }
