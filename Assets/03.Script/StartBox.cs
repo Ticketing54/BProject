@@ -1,7 +1,6 @@
 using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public class StartBox : MonoBehaviour
@@ -24,7 +23,6 @@ public class StartBox : MonoBehaviour
 
     private Sequence closeBoxAnimation;
     private Sequence dropBoxAnimation;
-    private GameManager gameManager => GameManager.Instance;
     private Coroutine moveBox_routine;
     private int ballCount = 0;
 
@@ -45,10 +43,11 @@ public class StartBox : MonoBehaviour
     {
         dropBoxAnimation = DOTween.Sequence().SetAutoKill(false)
             .AppendCallback(ReleaseInput)
-            .Append(leftBoxWing.DOLocalRotate(new Vector3(90f, 0f, 45f), 1)).SetUpdate(UpdateType.Fixed)
-            .Join(rightBoxWing.DOLocalRotate(new Vector3(90f, 0f, -45f), 1)).SetUpdate(UpdateType.Fixed)
-            .Join(frontBoxWing.DOLocalRotate(new Vector3(130f, 0, 0), 1)).SetUpdate(UpdateType.Fixed)
-            .Join(backBoxWing.DOLocalRotate(new Vector3(45f, 0f, 0f), 1)).SetUpdate(UpdateType.Fixed)
+            .AppendInterval(0.1f)
+            .Append(leftBoxWing.DOLocalRotate(new Vector3(90f, 0f, 45f), 0.5f)).SetUpdate(UpdateType.Fixed)
+            .Join(rightBoxWing.DOLocalRotate(new Vector3(90f, 0f, -45f), 0.5f)).SetUpdate(UpdateType.Fixed)
+            .Append(frontBoxWing.DOLocalRotate(new Vector3(130f, 0, 0), 0.5f)).SetUpdate(UpdateType.Fixed)
+            .Join(backBoxWing.DOLocalRotate(new Vector3(45f, 0f, 0f), 0.5f)).SetUpdate(UpdateType.Fixed)
             .AppendCallback(AnimationEnd);                         // Animation End
 
     }
@@ -65,16 +64,33 @@ public class StartBox : MonoBehaviour
         // Animation Setup
         SetupCloseAnimation();
         SetupDropAnimation();
-
-        gameManager.ResetObject += ResetObject;
     }
+
+    private void OnEnable()
+    {
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.ResetObject += ResetObject;
+            GameManager.Instance.OnStartBoxSet += SetStartBox;
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.ResetObject -= ResetObject;
+            GameManager.Instance.OnStartBoxSet -= SetStartBox;
+        }
+    }
+
 
     private void OnTriggerEnter(Collider other)
     {
-        if(other.TryGetComponent<Ball>(out Ball ball))
+        if (other.TryGetComponent<Ball>(out Ball ball))
         {
             ballCount++;
-            if(GameManager.Instance.IsAllBallsEntered(ballCount))
+            if (GameManager.Instance.IsAllBallsEntered(ballCount))
             {
                 RegisterInput();
             }
@@ -83,8 +99,8 @@ public class StartBox : MonoBehaviour
 
     private void RegisterInput()
     {
-        gameManager.InputClickDown += OnClickDown;
-        gameManager.InputClickUp += OnClickUp;
+        GameManager.Instance.InputClickDown += OnClickDown;
+        GameManager.Instance.InputClickUp += OnClickUp;
 
         if (moveBox_routine != null)
             StopCoroutine(moveBox_routine);
@@ -92,13 +108,26 @@ public class StartBox : MonoBehaviour
 
     private void ReleaseInput()
     {
-        gameManager.InputClickDown -= OnClickDown;
-        gameManager.InputClickUp -= OnClickUp;
+        GameManager.Instance.InputClickDown -= OnClickDown;
+        GameManager.Instance.InputClickUp -= OnClickUp;
     }
 
-    public void SetStartPosition(float _stateLength)
+    private void SetStartBox(List<Ball> _ballList, float _stateLength)
     {
         transform.position = new Vector3(0, _stateLength - 5f, 0);
+
+        List<Transform> startPositionList = GetStartBallPosition();
+
+        if (_ballList.Count >= startPositionList.Count)
+        {
+            Debug.LogError("지정된 시작 위치보다 공의 개수가 많습니다.");
+            return;
+        }
+
+        for (int i = 0; i < _ballList.Count; i++)
+        {
+            _ballList[i].Move(startPositionList[i].position);
+        }
     }
 
     public List<Transform> GetStartBallPosition()
@@ -134,18 +163,18 @@ public class StartBox : MonoBehaviour
 
     private void AnimationEnd()
     {
-        gameManager.SetCameraTarget(null);
+        GameManager.Instance?.LookatLowestBall();
 
-        if(moveBox_routine != null)
-            StopCoroutine (moveBox_routine);
+        if (moveBox_routine != null)
+            StopCoroutine(moveBox_routine);
     }
 
     private IEnumerator CoMoveBox()
     {
         WaitForFixedUpdate waitForFixedUpdate = new WaitForFixedUpdate();
-        while(true)
+        while (true)
         {
-            Vector2 direction = gameManager.Direction;
+            Vector2 direction = GameManager.Instance?.Direction ?? Vector2.zero;
 
             if (Mathf.Abs(direction.x) < 0.1f)
             {
@@ -157,7 +186,7 @@ public class StartBox : MonoBehaviour
             destination.x = Mathf.Clamp(destination.x, -3.3f, 3.3f);
             rig.MovePosition(destination);
 
-            yield return waitForFixedUpdate;
+            yield return null;
         }
     }
 
@@ -169,7 +198,7 @@ public class StartBox : MonoBehaviour
 
         RegisterInput();
     }
-    
+
 
     private void OnClickDown() => CloseBoxAnimation();
 

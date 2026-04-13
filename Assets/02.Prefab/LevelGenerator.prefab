@@ -47,4 +47,8 @@ MonoBehaviour:
   levelData:
   - level: 1
     stageDataArray:
-    - {fileID: 11400000, guid: 190f64069dda4e54f91f9ab806a33459, type: 2}
+    - {fileID: 11400000, guid: 4fca57e2e9dca2c4a908037a08c47aa0, type: 2}
+  - level: 2
+    stageDataArray:
+    - {fileID: 11400000, guid: b6595e5237c1c814e891f84f222c8bdd, type: 2}
+    - {fileID: 11400000, guid: ec50d3b085d402247802ca502f09508a, type: 2}

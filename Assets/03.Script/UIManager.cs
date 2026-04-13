@@ -126,47 +126,50 @@ public class UIManager : MonoBehaviour
     {
         timer = 0;
         Color originColor = image_Fade.color;
-        originColor.a = 0f;
 
         while (true)
         {
             yield return null;
+
+            if (originColor.a >= 1f)
+            {
+                _callBack?.Invoke();
+                originColor.a = 1f;
+                yield break;
+            }
 
             timer += Time.deltaTime;
             originColor.a = Mathf.Clamp01(timer / fadeDuration);
 
             image_Fade.color = originColor;
 
-            if (originColor.a >= 1f)
-            {
-                _callBack?.Invoke();
-                yield break;
-            }
 
         }
+
     }
 
     private IEnumerator CoFadeOut(Action _callBack)
     {
         timer = 0;
         Color originColor = image_Fade.color;
-        originColor.a = 1f;
+
+        yield return new WaitForSeconds(1f);
 
         while (true)
         {
             yield return null;
 
+            if (originColor.a <= 0f)
+            {
+                _callBack?.Invoke();
+                originColor.a = 0f;
+                yield break;
+            }
+
             timer += Time.deltaTime;
             originColor.a = 1 - (timer / fadeDuration);
 
             image_Fade.color = originColor;
-
-            if (originColor.a <= 0f)
-            {
-                _callBack?.Invoke();
-                yield break;
-            }
-
         }
     }
 

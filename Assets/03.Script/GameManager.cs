@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 
@@ -37,14 +36,12 @@ public class GameManager : MonoBehaviour
     public enum eGameState
     {
         None,
-        Intro,              // 최초 시작 연출 
         Ready,              // 스테이지 전환 준비
         Loading,            // 리소스 로드 중
         Active,             // 로드 완료 및 대기 상태 
         Cutscene,           // 카메라 이벤트 등 연출 
         Playing,            // 실제 게임 플레이
         Result,             // 스테이지 종료 및 결과 
-        Test
     }
 
     // Ball Contatiner
@@ -53,13 +50,10 @@ public class GameManager : MonoBehaviour
     // Camera
     [SerializeField] private CameraController cameraController;
 
-    // UImanager
-    [SerializeField] private UIManager uiManager;
+    //StageContainer
     [SerializeField] private StageContainer stageContainer;
 
-    // StartBox
-    [SerializeField] private StartBox startBox;
-    [SerializeField] private EndBox endBox;
+    //Test
     [SerializeField] private bool isTestMode = false;
 
     // Input
@@ -70,17 +64,20 @@ public class GameManager : MonoBehaviour
     public Vector2 Direction = Vector2.zero;
 
     private eGameState currentGameState = eGameState.None;
-    private int playLevel = 1;
     private int stageScore = 0;
-    private StageData currentStageData;
+    private bool isRestart = false;
 
-    public event Action<int,int> OnScoreChanged;
+    public event Action<int, int> OnScoreChanged;
     public event Action<Action> OnFadeInRequest;
     public event Action<Action> OnFadeOutRequest;
     public event Action<bool> OnOpenResultPage;
     public event Action ResetObject;
     public event Action<bool> OnBlockInput;
     public event Action EditorExit;
+
+    public event Action<List<Ball>, float> OnStartBoxSet;
+
+    public StageData CurrentStageData => stageContainer.CurrentStageData ?? null;
     private void Awake()
     {
         if (objectContainer == null)
@@ -93,20 +90,17 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         if (isTestMode)
-        {
-            ChangeGameState(eGameState.Test);
             return;
-        }
 
-        ChangeGameState(eGameState.Intro);
+        ChangeGameState(eGameState.Ready);
     }
-    public void SetTestStage(StageData _stageData) => currentStageData = _stageData;
+    public void SetTestStage(StageData _stageData) => objectContainer.StateSet(_stageData);
     public bool IsAllBallsEntered(int _count) => _count >= objectContainer.ActiveBallCount;
 
     public void SetScore(int _score)
     {
         stageScore = _score;
-        OnScoreChanged?.Invoke(stageScore, currentStageData.goalScore);
+        OnScoreChanged?.Invoke(stageScore, CurrentStageData.goalScore);
 
         if (IsAllBallsEntered(_score) && !isTestMode)
             ChangeGameState(eGameState.Result);
@@ -116,47 +110,16 @@ public class GameManager : MonoBehaviour
     {
         return stageScore.ToString();
     }
-    
+
     #region Camera
 
-    private Transform camearaTarget;
+    public void FixCameraStartPosition() => cameraController.FixCameraPosition(CurrentStageData.stageLength - 5);
+    public void FixCameraEndPosition() => cameraController.FixCameraPositionSmooth(DataBundle.ENDBOX_POSITION);
 
-    public void SetCameraTarget(Transform _Target = null)
-    {
-        camearaTarget = _Target;
-        cameraController.LookAtTarget();
-    }
 
-    public Transform GetCameraTarget()
-    {
-        if (camearaTarget == null)
-        {
-            return FindLowestBall()?.transform;
-        }
 
-        return camearaTarget;
-    }
-    private Ball FindLowestBall()
-    {
-        List<Ball> ballList = objectContainer.ActiveBallList();
-
-        if (ballList == null)
-            return null;
-       
-        Ball lowestBall = ballList.Count == 0 ? null : ballList[0];
-
-        foreach (Ball ball in ballList)
-        {
-            if (ball == null)
-                continue;
-
-            if (lowestBall.transform.position.y > ball.transform.position.y)
-                lowestBall = ball;
-        }
-
-        return lowestBall;
-    }
-
+    public void LookatLowestBall() => cameraController.LookAtLowestBall();
+    public List<Ball> GetActiveBallList => objectContainer?.ActiveBallList() ?? null;
 
     #endregion
 
@@ -184,28 +147,27 @@ public class GameManager : MonoBehaviour
         return objectContainer.GetObstacle_Material(_targetColor);
     }
 
-    public void CreateStartBall(int _count)
+    public void SetStartBox()
     {
-        if (startBox == null)
-        {
-            Debug.LogError("StartBox reference is missing in ObjectContainer.");
-            return;
-        }
+        int count = Mathf.Clamp(CurrentStageData.startBallCount, 1, 10);
 
-        int count = Mathf.Clamp(_count, 1, 10);
-
-        List<Transform> startposition = startBox.GetStartBallPosition();
+        List<Ball> startBallList = new List<Ball>();
 
         for (int i = 0; i < count; i++)
         {
-            objectContainer.GetBall(startposition[i % startposition.Count].position);
+            startBallList.Add(objectContainer.GetBall(Vector3.zero));
         }
+
+        OnStartBoxSet?.Invoke(startBallList,CurrentStageData.stageLength);
     }
 
     public void NextStage(bool _isRestart)
     {
-        // 추후 수정
-        PlayerPrefs.SetInt(currentStageData.name, 1);
+        if (!_isRestart)
+            PlayerPrefs.SetInt(CurrentStageData.name, 1);
+
+        isRestart = _isRestart;
+
         ChangeGameState(eGameState.Ready);
     }
 
@@ -218,28 +180,24 @@ public class GameManager : MonoBehaviour
         {
             case eGameState.None:
                 break;
-            case eGameState.Test:
-                TestMode();
-                break;
-            case eGameState.Intro:
-                Intro();
-                break;
-            case eGameState.Ready:          // 스테이지 전환 준비 (UI FadeIn)
+            case eGameState.Ready:          
+
+                stageContainer.SetStage(isRestart);  //  스테이지 정보 저장
+
+                isRestart = false;
+
                 OnFadeInRequest?.Invoke(() => ChangeGameState(eGameState.Loading));
                 break;
             case eGameState.Loading:        // 리소스 로드 및 스테이지 배치
 
                 ResetObject?.Invoke();
 
-                currentStageData = stageContainer.GetStageData();
 
-                startBox.SetStartPosition(currentStageData.stageLength);
+                SetStartBox();
 
-                CreateStartBall(currentStageData.startBallCount);
+                cameraController.SetOpeningData(CurrentStageData.stageLength);
 
-                cameraController.SetOpeningData(currentStageData.stageLength);
-
-                objectContainer.StateSet(currentStageData);
+                objectContainer.StateSet(CurrentStageData);
 
                 ChangeGameState(eGameState.Active);
 
@@ -252,7 +210,7 @@ public class GameManager : MonoBehaviour
                 break;
             case eGameState.Playing:
                 OnBlockInput?.Invoke(false);
-                SetCameraTarget(startBox.transform);
+                FixCameraStartPosition();
                 // 입력 활성화
                 break;
             case eGameState.Result:
@@ -270,27 +228,6 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void TestMode()
-    {
-        SetCameraTarget(startBox.transform);
-    }
-
-    private void Intro()
-    {
-        playLevel = PlayerPrefs.GetInt("PlayerLevel", 1);               //  플레이어 레벨 불러오기 (기본값 1)
-
-        currentStageData = stageContainer.GetStageData();   // 스테이지 데이터 불러오기
-
-        startBox.SetStartPosition(currentStageData.stageLength);               // 스타트 박스 위치 설정
-
-        CreateStartBall(currentStageData.startBallCount);                      // 시작 볼 생성
-
-        objectContainer.StateSet(currentStageData);                            // 오브젝트 컨테이너에 스테이지 데이터 전달 및 스테이지 배치 
-
-        SetCameraTarget(startBox.transform);                            // 카메라 타겟 설정
-
-    }
-
     private void Result()
     {
         StartCoroutine(CoResult());
@@ -299,11 +236,7 @@ public class GameManager : MonoBehaviour
     private IEnumerator CoResult()
     {
         yield return new WaitForSeconds(3f);
-        
-        OnOpenResultPage?.Invoke(currentStageData.goalScore <= stageScore);
+
+        OnOpenResultPage?.Invoke(CurrentStageData.goalScore <= stageScore);
     }
-
-
-    
-
 }

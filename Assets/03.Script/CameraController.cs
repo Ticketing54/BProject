@@ -1,55 +1,98 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
-    private Transform target
-    {
-        get
-        {
-            if (GameManager.Instance == null)
-                return null;
-
-            return GameManager.Instance.GetCameraTarget();
-        }
-    }
-
-    private Vector3 offset;
     private Coroutine cameraRoutine;
 
     private const float animationDuration = 5.0f;
 
     private float startPostionY = 0;
     private const float endPostionY = -15;
-    public float aa = 5;
-    private void Start()
+    public float moveSpeed = 5;
+
+    public void FixCameraPosition(float _positionY)
     {
-        offset = transform.position;
+        if (cameraRoutine != null)
+            StopCoroutine(cameraRoutine);
+
+        Vector3 targetPosition = transform.position;
+        targetPosition.y= _positionY;
+        transform.position = targetPosition;
     }
 
-    public void LookAtTarget()
+    public void FixCameraPositionSmooth(float _positionY)
+    {
+        if (cameraRoutine != null)
+            StopCoroutine(cameraRoutine);
+
+        Vector3 destination = new Vector3(transform.position.x, _positionY, transform.position.z);
+
+        cameraRoutine = StartCoroutine(CoSmoothMove(destination));
+    }
+
+    private IEnumerator CoSmoothMove(Vector3 _destination)
+    {
+        while (Mathf.Abs(transform.position.y - _destination.y) > 0.01f)
+        {
+            float newY = Mathf.Lerp(transform.position.y, _destination.y, Time.deltaTime * moveSpeed);
+            transform.position = new Vector3(transform.position.x, newY, transform.position.z);
+            yield return null;
+        }
+
+        transform.position = _destination;
+    }
+
+
+    public void LookAtLowestBall()
     {
         if(cameraRoutine != null)
             StopCoroutine(cameraRoutine);
 
-        cameraRoutine = StartCoroutine(CoTrackingTarget());
+        cameraRoutine = StartCoroutine(CoTrackingLowestBall());
     }
 
-    private IEnumerator CoTrackingTarget()
+    private IEnumerator CoTrackingLowestBall()
     {
+        Ball target;
+
         while (true)
         {
+            target = FindLowestBall();
+
             if (target != null && target.gameObject.activeSelf)
-            {   
-                offset.y = target.transform.position.y;
-                offset.y = Mathf.Lerp(transform.position.y, offset.y, Time.deltaTime * aa);
-                transform.position = offset;
+            {
+                float newY = Mathf.Lerp(transform.position.y, target.transform.position.y, Time.deltaTime * moveSpeed);
+                transform.position = new Vector3(transform.position.x, newY, transform.position.z);
             }
 
             yield return null;
         }
     }
+
+    private Ball FindLowestBall()
+    {
+        List<Ball> ballList = GameManager.Instance.GetActiveBallList;
+
+        if (ballList == null)
+            return null;
+
+        Ball lowestBall = ballList.Count == 0 ? null : ballList[0];
+
+        foreach (Ball ball in ballList)
+        {
+            if (ball == null)
+                continue;
+
+            if (lowestBall.transform.position.y > ball.transform.position.y)
+                lowestBall = ball;
+        }
+
+        return lowestBall;
+    }
+
 
     #region OPENING
 
@@ -87,7 +130,7 @@ public class CameraController : MonoBehaviour
 
         transform.position = animationEndPosition;
 
-        LookAtTarget();
+        LookAtLowestBall();
 
         _callback?.Invoke();
     }

@@ -178,7 +178,7 @@ public class SlideBox : MonoBehaviour, IObstacle
 
     public void ApplyData(ObstacleData data)
     {
-        if (data is DubbleDuplicateBoxData == false)
+        if (data is SlideBoxData == false)
             return;
 
         Setup(data as SlideBoxData);
@@ -187,7 +187,7 @@ public class SlideBox : MonoBehaviour, IObstacle
     public ObstacleData GetObstacleData()
     {
         SlideBoxData data = new SlideBoxData();
-        data.prefabtype = DataBundle.ObstacleType.DOUBLE_DUPLICATION_BOX;
+        data.prefabtype = DataBundle.ObstacleType.SLIDE_BOX;
         data.position = transform.position;
         data.rotation = transform.rotation;
         data.scale = transform.localScale;

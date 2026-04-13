@@ -53,10 +53,10 @@ public class ReplicateController : MonoBehaviour
 
     private IEnumerator CoReplicateBall(Ball _ball, int _count)
     {
-        ignoreBall_HashSet.Add(_ball);
-
-        int ballCount = 1;
         Vector3 position = _ball.transform.position;
+        gameManager.ReturnBall(_ball);
+
+        int ballCount = 0;
 
         while (ballCount < _count)
         {

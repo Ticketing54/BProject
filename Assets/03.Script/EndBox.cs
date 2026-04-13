@@ -2,17 +2,29 @@ using UnityEngine;
 
 public class EndBox : MonoBehaviour
 {
-    [SerializeField] private Transform cameraTarget;
     private int count = 0;
+    private bool firstTouch = false;
 
-    private void Awake()
+    private void OnEnable()
     {
-        GameManager.Instance.ResetObject += ResetObject;
+        if(GameManager.Instance != null)
+        {
+            GameManager.Instance.ResetObject += ResetObject;
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.ResetObject -= ResetObject;
+        }
     }
 
     private void ResetObject()
     {
         count = 0;
+        firstTouch = false;
     }
 
     private void OnTriggerEnter(Collider other)
@@ -22,6 +34,12 @@ public class EndBox : MonoBehaviour
         
         if(other.TryGetComponent<Ball>(out Ball endBall))
         {
+            if (!firstTouch)
+            {
+                firstTouch = !firstTouch;
+                GameManager.Instance.FixCameraEndPosition();
+            }
+
             endBall.ConstraintsPositionZ(false);
         }
     }

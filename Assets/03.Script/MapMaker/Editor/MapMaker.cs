@@ -10,6 +10,7 @@ public static class MapMaker
     private static int stageLevel = 1;
     private static float stageLength = 300f;
     private static int startBallCount = 1;
+    private static int goalscore = 1;
     private const string SAVE_PATH = "Assets/05.Data/MapData/";
     private const string MAKE_SCENE_NAME = "CreateScene";
     private const string TEMP_STAGEDATA = "Assets/05.Data/CreateSceneData/CreateSceneData.asset";
@@ -66,16 +67,9 @@ public static class MapMaker
             tempStageData.stagesLvel = stageLevel;
             tempStageData.stageLength = stageLength;
             tempStageData.startBallCount = startBallCount;
-            // 폴더가 없는 경우를 대비해 경로 체크 (선택 사항)
-            // if (!AssetDatabase.IsValidFolder("Assets/05.Data/MapData")) { ... }
 
             AssetDatabase.CreateAsset(tempStageData, TEMP_STAGEDATA);
-            AssetDatabase.SaveAssets(); // 변경사항 디스크에 기록
-            Debug.Log($"새 에셋 생성 완료: {TEMP_STAGEDATA}");
-        }
-        else
-        {
-            Debug.Log($"기존 에셋 로드 완료: {TEMP_STAGEDATA}");
+            AssetDatabase.SaveAssets(); 
         }
 
         stageLevel = tempStageData.stagesLvel;
@@ -97,9 +91,9 @@ public static class MapMaker
 
         Rect boxRect = new Rect(
             sceneView.position.width - boxWidth - padding,
-            sceneView.position.height - 300 - padding,
+            sceneView.position.height - 400 - padding,
             boxWidth,
-            300
+            400
         );
 
         // Popup Style
@@ -124,6 +118,10 @@ public static class MapMaker
         GUILayout.Label("시작 공갯수[1~10]");
         startBallCount = EditorGUILayout.IntField(startBallCount);
         tempStageData.startBallCount = startBallCount;
+        GUILayout.Label("목표 공갯수");
+        goalscore = EditorGUILayout.IntField(goalscore);
+        tempStageData.goalScore = goalscore;
+
         GUILayout.Space(10);
 
         if (GUILayout.Button("적용"))
@@ -196,6 +194,7 @@ public static class MapMaker
         newStage.stagesLvel = stageLevel;
         newStage.stageLength = stageLength;
         newStage.startBallCount = startBallCount;
+        newStage.goalScore = goalscore;
 
         var founds = Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None)
                            .OfType<IObstacle>();

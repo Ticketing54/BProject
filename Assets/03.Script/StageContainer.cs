@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.WindowsRuntime;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -16,6 +17,7 @@ public class StageContainer : MonoBehaviour
 
     private Dictionary<string, StageData> stageData_Dictionary = new Dictionary<string, StageData>();
     private List<string> keyList = new List<string>();
+    public StageData CurrentStageData{ get; private set; }
 
     private void Start()
     {
@@ -29,26 +31,34 @@ public class StageContainer : MonoBehaviour
         }
     }
 
-
-
-
-    public StageData GetStageData()
+    public void SetStage(bool _isRestart= false)
     {
+        if (_isRestart)
+            return;
+
         foreach (string key in keyList)
         {
-            int isCleared = PlayerPrefs.GetInt(key, 0); // 추후 수정
+            int isCleared = PlayerPrefs.GetInt(key, 0); 
 
             if (isCleared == 0)
             {
-                return stageData_Dictionary[key];
+                CurrentStageData = stageData_Dictionary[key];
+                return;
             }
         }
 
         // AllClear 
+        List<string> tempkeyList = new List<string>(keyList);
 
-        int randomIndex = UnityEngine.Random.Range(0, keyList.Count);
+        if (CurrentStageData != null && tempkeyList.Count > 1)
+        {
+            tempkeyList.Remove(CurrentStageData.name);
+        }   
 
-        return stageData_Dictionary[keyList[randomIndex]];
+        int randomIndex = UnityEngine.Random.Range(0, tempkeyList.Count);
+        CurrentStageData = stageData_Dictionary[tempkeyList[randomIndex]];
     }
+
+    public void SetStage(StageData _stageData) => CurrentStageData = _stageData;
 
 }

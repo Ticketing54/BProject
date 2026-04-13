@@ -2,6 +2,7 @@ using UnityEngine;
 
 public static class DataBundle
 {
+    public static float ENDBOX_POSITION = -12;
     #region Color
 
     public enum BallColor

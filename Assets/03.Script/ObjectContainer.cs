@@ -11,7 +11,7 @@ public class ObjectContainer : MonoBehaviour
     private class ObstaclePrefabData
     {
         public DataBundle.ObstacleType prefabtype = DataBundle.ObstacleType.NONE;
-        public GameObject prefab ;
+        public GameObject prefab = null;
     }
 
     [Header("Ball Settings")]
@@ -59,14 +59,13 @@ public class ObjectContainer : MonoBehaviour
 
     private void PoolReleaseBall(Ball _ball)
     {
+        if (!activeBall.Contains(_ball))
+            return;
+
+        activeBall.Remove(_ball);
         _ball.gameObject.transform.position = ballReleasePoint;
         _ball.gameObject.SetActive(false);
         _ball.ConstraintsPositionZ(true);
-
-        if (activeBall.Contains(_ball))
-            activeBall.Remove(_ball);
-        else
-            Debug.LogError(_ball.name + " is not found in activeBall set.");
 
     }
 
