@@ -65,13 +65,13 @@ public class UIManager : MonoBehaviour
     public void OnClick_RetryButton()
     {
         end_CanvasGroup.gameObject.SetActive(false);
-        GameManager.Instance.NextStage(false);
+        GameManager.Instance.NextStage(true);
     }
 
     public void OnClick_NextStageButton()
     {
         end_CanvasGroup.gameObject.SetActive(false);
-        GameManager.Instance.NextStage(true);
+        GameManager.Instance.NextStage(false);
     }
 
     public void OpenResultPage(bool _isNext)

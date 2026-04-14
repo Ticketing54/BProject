@@ -24,7 +24,8 @@ public class StartBox : MonoBehaviour
     private Sequence closeBoxAnimation;
     private Sequence dropBoxAnimation;
     private Coroutine moveBox_routine;
-    private int ballCount = 0;
+
+
 
     #region BoxAnimation
 
@@ -35,19 +36,21 @@ public class StartBox : MonoBehaviour
             .Join(rightBoxWing.DOLocalRotate(new Vector3(90f, 0f, 90f), 0.5f)).SetUpdate(UpdateType.Fixed)
             .Append(frontBoxWing.DOLocalRotate(new Vector3(0, 0, 0), 0.5f)).SetUpdate(UpdateType.Fixed)
             .Join(backBoxWing.DOLocalRotate(new Vector3(180f, 0f, 0f), 0.5f)).SetUpdate(UpdateType.Fixed)
-            .Append(boxBody.DOLocalRotate(new Vector3(0, 0, -180), 0.5f)).SetUpdate(UpdateType.Fixed)
+            .Append(boxBody.DOLocalRotate(new Vector3(0, 0, -180), 0.5f)).SetUpdate(UpdateType.Fixed)            
+            .AppendCallback(LockBalls)                              // Animation End
             .AppendCallback(StartMoveBox);                         // Animation End
     }
 
     private void SetupDropAnimation()
     {
         dropBoxAnimation = DOTween.Sequence().SetAutoKill(false)
-            .AppendCallback(ReleaseInput)
+            .AppendCallback(ReleaseInput)            
             .AppendInterval(0.1f)
             .Append(leftBoxWing.DOLocalRotate(new Vector3(90f, 0f, 45f), 0.5f)).SetUpdate(UpdateType.Fixed)
             .Join(rightBoxWing.DOLocalRotate(new Vector3(90f, 0f, -45f), 0.5f)).SetUpdate(UpdateType.Fixed)
             .Append(frontBoxWing.DOLocalRotate(new Vector3(130f, 0, 0), 0.5f)).SetUpdate(UpdateType.Fixed)
             .Join(backBoxWing.DOLocalRotate(new Vector3(45f, 0f, 0f), 0.5f)).SetUpdate(UpdateType.Fixed)
+            .AppendCallback(BallsWakeUp)
             .AppendCallback(AnimationEnd);                         // Animation End
 
     }
@@ -84,18 +87,21 @@ public class StartBox : MonoBehaviour
         }
     }
 
+    private List<Ball> ballList = new List<Ball>();
 
     private void OnTriggerEnter(Collider other)
     {
         if (other.TryGetComponent<Ball>(out Ball ball))
         {
-            ballCount++;
-            if (GameManager.Instance.IsAllBallsEntered(ballCount))
+            ballList.Add(ball);
+
+            if (GameManager.Instance.IsAllBallsEntered(ballList.Count))
             {
                 RegisterInput();
             }
         }
     }
+
 
     private void RegisterInput()
     {
@@ -168,7 +174,23 @@ public class StartBox : MonoBehaviour
         if (moveBox_routine != null)
             StopCoroutine(moveBox_routine);
     }
+    private void LockBalls()
+    {
+        foreach(Ball ball in ballList)
+        {
+            ball.Sleep(this.transform);
+        }
+    }
 
+    private void BallsWakeUp()
+    {
+        foreach(Ball ball in ballList)
+        {
+            ball.WakeUp();
+        }
+
+        ballList.Clear();
+    }
     private IEnumerator CoMoveBox()
     {
         WaitForFixedUpdate waitForFixedUpdate = new WaitForFixedUpdate();

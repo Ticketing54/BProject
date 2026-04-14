@@ -34,7 +34,7 @@ public static class DataBundle
 
     public static readonly WaitForSeconds DELAY_REPLICATETIME = new WaitForSeconds(0.1f);
 
-    public const float DUPLICATE_SPRAY_RANGE = 0.1f;
+    public const float DUPLICATE_SPRAY_RANGE = 0.5f;
     public const float DUPLICATE_MAX_LENGHT = 9f;
     public static Vector3 DUPLICATE_CANVAS_SCALE = new Vector3(0.003f, 0.003f, 0.003f);
 

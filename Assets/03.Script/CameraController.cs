@@ -83,7 +83,7 @@ public class CameraController : MonoBehaviour
 
         foreach (Ball ball in ballList)
         {
-            if (ball == null)
+            if (ball == null || !ball.gameObject.activeSelf)
                 continue;
 
             if (lowestBall.transform.position.y > ball.transform.position.y)

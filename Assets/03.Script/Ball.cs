@@ -6,12 +6,21 @@ public class Ball : MonoBehaviour
 {   
     [SerializeField] private Rigidbody rig;
 
-    public void ClearForces()
+    public void Sleep(Transform _transform)
     {
-        
+        transform.SetParent(_transform, true);
+        rig.isKinematic = true;
+        rig.Sleep();
+    }
 
+    public void WakeUp()
+    {
+        transform.SetParent(null,true);
+        rig.isKinematic = false;
         rig.linearVelocity = Vector3.zero;
         rig.angularVelocity = Vector3.zero;
+        rig.WakeUp();
+        rig.AddForce(Vector3.up * 0.1f, ForceMode.Impulse);
     }
 
     public void Move(Vector3 _position)

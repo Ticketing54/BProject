@@ -63,8 +63,8 @@ public class ObjectContainer : MonoBehaviour
             return;
 
         activeBall.Remove(_ball);
-        _ball.gameObject.transform.position = ballReleasePoint;
         _ball.gameObject.SetActive(false);
+        _ball.Sleep(this.transform);
         _ball.ConstraintsPositionZ(true);
 
     }
@@ -85,7 +85,7 @@ public class ObjectContainer : MonoBehaviour
             actionOnDestroy: PoolDestroyBall,
             collectionCheck: false,
             defaultCapacity: 10,
-            maxSize: 20
+            maxSize: 200
         );
 
         if (ballMaterial == null)
@@ -113,7 +113,7 @@ public class ObjectContainer : MonoBehaviour
         }
 
         Ball newBall = ballPool.Get();
-
+        newBall.WakeUp();
         newBall.Move(_position);
         newBall.gameObject.SetActive(true);
 

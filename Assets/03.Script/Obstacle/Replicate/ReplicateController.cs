@@ -54,8 +54,8 @@ public class ReplicateController : MonoBehaviour
     private IEnumerator CoReplicateBall(Ball _ball, int _count)
     {
         Vector3 position = _ball.transform.position;
-        gameManager.ReturnBall(_ball);
-
+        
+        _ball.gameObject.SetActive(false);
         int ballCount = 0;
 
         while (ballCount < _count)
@@ -65,8 +65,8 @@ public class ReplicateController : MonoBehaviour
 
             Vector3 sprayPosition = position;
             sprayPosition.x += xOffset;
-
-            Ball newBall = gameManager.CreateBall(sprayPosition);
+            sprayPosition.y += ballCount * 0.5f;
+            Ball newBall = gameManager.CreateBall(sprayPosition);       //////////// 여기가 문제일 수 있음
 
             ignoreBall_HashSet.Add(newBall);        // 무한생성 방지 
 
@@ -76,6 +76,8 @@ public class ReplicateController : MonoBehaviour
 
             yield return DataBundle.DUPLICATE_SPRAY_RANGE;
         }
+
+        gameManager.ReturnBall(_ball);
 
         yield return null;
     }
