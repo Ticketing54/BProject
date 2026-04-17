@@ -13,14 +13,11 @@ public class StartBox : MonoBehaviour
     [SerializeField] private Transform backBoxWing;
 
     [Header("Move")]
-    [SerializeField] private float moveSpeed = 0.01f;
+    [SerializeField] private Rigidbody boxRig;
+    [SerializeField] private float moveSpeed = 0.05f;
 
     [Header("Start Position Data")]
     [SerializeField] private List<Transform> startPosition;
-
-
-    public Rigidbody rig;
-
     private Sequence closeBoxAnimation;
     private Sequence dropBoxAnimation;
     private Coroutine moveBox_routine;
@@ -93,6 +90,9 @@ public class StartBox : MonoBehaviour
     {
         if (other.TryGetComponent<Ball>(out Ball ball))
         {
+            if (ballList.Contains(ball))
+                return;
+
             ballList.Add(ball);
 
             if (GameManager.Instance.IsAllBallsEntered(ballList.Count))
@@ -107,9 +107,6 @@ public class StartBox : MonoBehaviour
     {
         GameManager.Instance.InputClickDown += OnClickDown;
         GameManager.Instance.InputClickUp += OnClickUp;
-
-        if (moveBox_routine != null)
-            StopCoroutine(moveBox_routine);
     }
 
     private void ReleaseInput()
@@ -120,7 +117,9 @@ public class StartBox : MonoBehaviour
 
     private void SetStartBox(List<Ball> _ballList, float _stateLength)
     {
-        transform.position = new Vector3(0, _stateLength - 5f, 0);
+        Vector3 startPosition = new Vector3(0, _stateLength - 5f, 0);
+        transform.position = startPosition;
+        boxRig.position = startPosition;
 
         List<Transform> startPositionList = GetStartBallPosition();
 
@@ -174,11 +173,12 @@ public class StartBox : MonoBehaviour
         if (moveBox_routine != null)
             StopCoroutine(moveBox_routine);
     }
+
     private void LockBalls()
     {
         foreach(Ball ball in ballList)
         {
-            ball.Sleep(this.transform);
+            ball.FixedObject(boxRig);
         }
     }
 
@@ -186,27 +186,30 @@ public class StartBox : MonoBehaviour
     {
         foreach(Ball ball in ballList)
         {
-            ball.WakeUp();
+            ball.RealsedObject();
         }
 
         ballList.Clear();
     }
+
     private IEnumerator CoMoveBox()
     {
-        WaitForFixedUpdate waitForFixedUpdate = new WaitForFixedUpdate();
         while (true)
         {
             Vector2 direction = GameManager.Instance?.Direction ?? Vector2.zero;
 
             if (Mathf.Abs(direction.x) < 0.1f)
             {
-                yield return waitForFixedUpdate;
+                yield return null;
                 continue;
             }
 
             Vector3 destination = transform.position + new Vector3(direction.x * moveSpeed, 0, 0);
+
+            Debug.Log(direction + " / " + destination);
+
             destination.x = Mathf.Clamp(destination.x, -3.3f, 3.3f);
-            rig.MovePosition(destination);
+            transform.position = destination;
 
             yield return null;
         }

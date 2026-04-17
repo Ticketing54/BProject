@@ -64,9 +64,7 @@ public class ObjectContainer : MonoBehaviour
 
         activeBall.Remove(_ball);
         _ball.gameObject.SetActive(false);
-        _ball.Sleep(this.transform);
         _ball.ConstraintsPositionZ(true);
-
     }
 
     private void Setup()
@@ -113,10 +111,8 @@ public class ObjectContainer : MonoBehaviour
         }
 
         Ball newBall = ballPool.Get();
-        newBall.WakeUp();
         newBall.Move(_position);
         newBall.gameObject.SetActive(true);
-
         return newBall;
     }
 
@@ -129,7 +125,6 @@ public class ObjectContainer : MonoBehaviour
         }
 
         _ball.gameObject.SetActive(false);
-
         ballPool.Release(_ball);
     }
 
