@@ -42,7 +42,7 @@ stencil: 충돌게이트가 무한히 회전하는것처럼 표현
 Cinemachine의 Virtual Camera와 Damping을 활용하여 타겟 추적 시 흔들림 없는 부드러운 카메라 이동을 구현
 
 
-**트러블 슈팅**
+**문제해결(TroubleShooting)**
 <br>
 개발 중 마주한 기술적 문제와 해결 과정입니다.
 <br>
