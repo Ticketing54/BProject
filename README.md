@@ -1,5 +1,7 @@
-## ChangeAndDrop
-<img width="548" height="391" alt="Animation" src="https://github.com/user-attachments/assets/283b9c9a-240d-4cff-8bca-b3aba19f66c0" />
+<h1 align="center">CHANGE AND DROP</h1>
+
+
+<h1 align="center"><img width="548" height="391" alt="Animation" src="https://github.com/user-attachments/assets/283b9c9a-240d-4cff-8bca-b3aba19f66c0" /></h1>
 
 **한 줄 소개**: 떨어지는 공을 원하는 박스에 떨어뜨려 많은 점수를 내는 게임
 
@@ -21,31 +23,35 @@
 
 이 프로젝트에서 공들여 구현한 기술적인 포인트들입니다.
 
-A. 게임 상태 관리 시스템
+1. 게임 상태 관리 시스템
 FSM 기반 GameManager를 구현하여 게임 흐름을 상태 단위로 관리하고,
 이벤트 기반 구조를 통해 각 시스템 간 결합도를 낮춘 구조 설계
 
-B. 실시간 객체 복제 시스템
+2. 실시간 객체 복제 시스템
 물리 기반의 볼 드롭 및 조건부 복제 로직 구현.
 ObjectPool 을 이용한 공 관리 
 
-C. 비주얼 피드백
+3. 비주얼 피드백
 Trail System: 이동 궤적을 시각화하여 속도감 부여.
 stencil: 충돌게이트가 무한히 회전하는것처럼 표현
 
-D. 맵 제작 간편화
+4. 맵 제작 간편화
 모든 장애물 오브젝트를 인터페이스 기반 장애물 데이터화로 맵 재사용 구조 구현
 
-E. 카메라 연출/ 제어
+5. 카메라 연출/ 제어
 Cinemachine의 Virtual Camera와 Damping을 활용하여 타겟 추적 시 흔들림 없는 부드러운 카메라 이동을 구현
 
 
 **트러블 슈팅**
+<br>
 개발 중 마주한 기술적 문제와 해결 과정입니다.
+<br>
 https://www.notion.so/TrounbleShooting-3490b606d4f480b192b2f726f24cf19d?source=copy_link
 
 **코드 아키텍처**
+<br>
 https://www.notion.so/Architecture-3490b606d4f48079a86dda7a4223fe8e?source=copy_link
 
 **데모 (Youtube)**
+<br>
 https://youtu.be/XfxsCGON0nA
