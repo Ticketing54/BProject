@@ -13,19 +13,16 @@ public class StartBox : MonoBehaviour
     [SerializeField] private Transform backBoxWing;
 
     [Header("Move")]
-    [SerializeField] private float moveSpeed = 0.01f;
+    [SerializeField] private Rigidbody boxRig;
+    [SerializeField] private float moveSpeed = 0.05f;
 
     [Header("Start Position Data")]
     [SerializeField] private List<Transform> startPosition;
 
-
-    public Rigidbody rig;
-
     private Sequence closeBoxAnimation;
     private Sequence dropBoxAnimation;
     private Coroutine moveBox_routine;
-
-
+    private List<Ball> ballList = new List<Ball>();
 
     #region BoxAnimation
 
@@ -36,23 +33,22 @@ public class StartBox : MonoBehaviour
             .Join(rightBoxWing.DOLocalRotate(new Vector3(90f, 0f, 90f), 0.5f)).SetUpdate(UpdateType.Fixed)
             .Append(frontBoxWing.DOLocalRotate(new Vector3(0, 0, 0), 0.5f)).SetUpdate(UpdateType.Fixed)
             .Join(backBoxWing.DOLocalRotate(new Vector3(180f, 0f, 0f), 0.5f)).SetUpdate(UpdateType.Fixed)
-            .Append(boxBody.DOLocalRotate(new Vector3(0, 0, -180), 0.5f)).SetUpdate(UpdateType.Fixed)            
-            .AppendCallback(LockBalls)                              // Animation End
-            .AppendCallback(StartMoveBox);                         // Animation End
+            .Append(boxBody.DOLocalRotate(new Vector3(0, 0, -180), 0.5f)).SetUpdate(UpdateType.Fixed);
+
+        closeBoxAnimation.OnComplete(CloseAnimationEndCallBack);
     }
 
     private void SetupDropAnimation()
     {
         dropBoxAnimation = DOTween.Sequence().SetAutoKill(false)
-            .AppendCallback(ReleaseInput)            
             .AppendInterval(0.1f)
             .Append(leftBoxWing.DOLocalRotate(new Vector3(90f, 0f, 45f), 0.5f)).SetUpdate(UpdateType.Fixed)
             .Join(rightBoxWing.DOLocalRotate(new Vector3(90f, 0f, -45f), 0.5f)).SetUpdate(UpdateType.Fixed)
             .Append(frontBoxWing.DOLocalRotate(new Vector3(130f, 0, 0), 0.5f)).SetUpdate(UpdateType.Fixed)
-            .Join(backBoxWing.DOLocalRotate(new Vector3(45f, 0f, 0f), 0.5f)).SetUpdate(UpdateType.Fixed)
-            .AppendCallback(BallsWakeUp)
-            .AppendCallback(AnimationEnd);                         // Animation End
+            .Join(backBoxWing.DOLocalRotate(new Vector3(45f, 0f, 0f), 0.5f)).SetUpdate(UpdateType.Fixed);
 
+        dropBoxAnimation.OnStart(ReleaseInput);
+        dropBoxAnimation.OnComplete(DropAnimationEndCallBack);
     }
 
 
@@ -87,12 +83,13 @@ public class StartBox : MonoBehaviour
         }
     }
 
-    private List<Ball> ballList = new List<Ball>();
-
     private void OnTriggerEnter(Collider other)
     {
         if (other.TryGetComponent<Ball>(out Ball ball))
         {
+            if (ballList.Contains(ball))
+                return;
+
             ballList.Add(ball);
 
             if (GameManager.Instance.IsAllBallsEntered(ballList.Count))
@@ -107,9 +104,6 @@ public class StartBox : MonoBehaviour
     {
         GameManager.Instance.InputClickDown += OnClickDown;
         GameManager.Instance.InputClickUp += OnClickUp;
-
-        if (moveBox_routine != null)
-            StopCoroutine(moveBox_routine);
     }
 
     private void ReleaseInput()
@@ -120,7 +114,10 @@ public class StartBox : MonoBehaviour
 
     private void SetStartBox(List<Ball> _ballList, float _stateLength)
     {
-        transform.position = new Vector3(0, _stateLength - 5f, 0);
+        Vector3 startPosition = new Vector3(0, _stateLength - 5f, 0);
+
+        transform.position = startPosition;
+        boxRig.position = startPosition;
 
         List<Transform> startPositionList = GetStartBallPosition();
 
@@ -159,66 +156,79 @@ public class StartBox : MonoBehaviour
     }
 
 
-    private void StartMoveBox()
+    private void CloseAnimationEndCallBack()
     {
+        // FixedJoint
+        foreach (Ball ball in ballList)
+        {
+            ball.FixedObject(boxRig);
+        }
+
+        // MoveBox
         if (moveBox_routine != null)
             StopCoroutine(moveBox_routine);
 
         moveBox_routine = StartCoroutine(CoMoveBox());
     }
 
-    private void AnimationEnd()
+    private void DropAnimationEndCallBack()
     {
-        GameManager.Instance?.LookatLowestBall();
-
-        if (moveBox_routine != null)
-            StopCoroutine(moveBox_routine);
-    }
-    private void LockBalls()
-    {
-        foreach(Ball ball in ballList)
+        // Ball List Reset
+        foreach (Ball ball in ballList)
         {
-            ball.Sleep(this.transform);
-        }
-    }
-
-    private void BallsWakeUp()
-    {
-        foreach(Ball ball in ballList)
-        {
-            ball.WakeUp();
+            ball.RealsedObject();
         }
 
         ballList.Clear();
+
+        // Camera Target Change
+        GameManager.Instance?.LookatLowestBall();
+
+        // Stop Coroutine 
+        if (moveBox_routine != null)
+            StopCoroutine(moveBox_routine);
     }
+
+
     private IEnumerator CoMoveBox()
     {
-        WaitForFixedUpdate waitForFixedUpdate = new WaitForFixedUpdate();
         while (true)
         {
             Vector2 direction = GameManager.Instance?.Direction ?? Vector2.zero;
 
             if (Mathf.Abs(direction.x) < 0.1f)
             {
-                yield return waitForFixedUpdate;
+                yield return null;
                 continue;
             }
 
             Vector3 destination = transform.position + new Vector3(direction.x * moveSpeed, 0, 0);
-            destination.x = Mathf.Clamp(destination.x, -3.3f, 3.3f);
-            rig.MovePosition(destination);
 
+            Debug.Log(direction + " / " + destination);
+
+            destination.x = Mathf.Clamp(destination.x, -3.3f, 3.3f);
+            transform.position = destination;
+            
             yield return null;
         }
     }
 
     private void ResetObject()
-    {
-        dropBoxAnimation.Rewind();
-        closeBoxAnimation.Rewind();
+    {   
+        if(moveBox_routine!= null)
+        {
+            StopCoroutine(moveBox_routine);
+            moveBox_routine = null;
+        }
 
+        dropBoxAnimation.Pause();
+        dropBoxAnimation.Rewind(false);
 
-        RegisterInput();
+        closeBoxAnimation.Pause();
+        closeBoxAnimation.Rewind(false);
+
+        transform.rotation = Quaternion.identity;
+        boxRig.rotation    = Quaternion.identity;
     }
 
 

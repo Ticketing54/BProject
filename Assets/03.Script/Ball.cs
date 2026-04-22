@@ -1,26 +1,27 @@
-using System.Collections;
 using UnityEngine;
 
 
 public class Ball : MonoBehaviour
-{   
+{
     [SerializeField] private Rigidbody rig;
-
-    public void Sleep(Transform _transform)
+    [SerializeField] private TrailRenderer trailRenderer;
+    
+    public void FixedObject(Rigidbody _parent)
     {
-        transform.SetParent(_transform, true);
-        rig.isKinematic = true;
-        rig.Sleep();
+        FixedJoint fixedJoint = gameObject.AddComponent<FixedJoint>();
+        fixedJoint.connectedBody = _parent;
+        fixedJoint.enableCollision = false;
+        rig.useGravity = false;
     }
 
-    public void WakeUp()
+    public void RealsedObject()
     {
-        transform.SetParent(null,true);
-        rig.isKinematic = false;
-        rig.linearVelocity = Vector3.zero;
-        rig.angularVelocity = Vector3.zero;
-        rig.WakeUp();
-        rig.AddForce(Vector3.up * 0.1f, ForceMode.Impulse);
+        if(TryGetComponent<FixedJoint>(out FixedJoint joint))
+        {
+            Destroy(joint);
+        }
+
+        rig.useGravity = true;
     }
 
     public void Move(Vector3 _position)
@@ -35,6 +36,8 @@ public class Ball : MonoBehaviour
         rig.angularVelocity = Vector3.zero;
         rig.linearVelocity = Vector3.zero;
         transform.position = _position;
+
+        trailRenderer.Clear();  // ¿‹ªÛ «ÿ∞·
     }
 
     public void ConstraintsPositionZ(bool _isLock)
