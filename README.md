@@ -42,16 +42,9 @@ stencil: 충돌게이트가 무한히 회전하는것처럼 표현
 Cinemachine의 Virtual Camera와 Damping을 활용하여 타겟 추적 시 흔들림 없는 부드러운 카메라 이동을 구현
 
 
-**문제해결(TroubleShooting)**
+**프로젝트 상세**
 <br>
-개발 중 마주한 기술적 문제와 해결 과정입니다.
-<br>
-https://www.notion.so/TrounbleShooting-3490b606d4f480b192b2f726f24cf19d?source=copy_link
-
-**코드 아키텍처**
-<br>
-https://www.notion.so/Architecture-3490b606d4f48079a86dda7a4223fe8e?source=copy_link
-
+https://coconut-flat-99f.notion.site/ChangeAndDrop-3490b606d4f48047b202d49d63601b6e
 **데모 (Youtube)**
 <br>
 https://youtu.be/XfxsCGON0nA
