@@ -78,6 +78,7 @@ public class GameManager : MonoBehaviour
     public event Action<List<Ball>, float> OnStartBoxSet;
 
     public StageData CurrentStageData => stageContainer.CurrentStageData ?? null;
+
     private void Awake()
     {
         if (objectContainer == null)
@@ -180,18 +181,18 @@ public class GameManager : MonoBehaviour
         {
             case eGameState.None:
                 break;
-            case eGameState.Ready:          
+            case eGameState.Ready:
+                OnBlockInput?.Invoke(true);
+                stageScore = 0;
+                OnFadeInRequest?.Invoke(() => ChangeGameState(eGameState.Loading));
+                break;
+            case eGameState.Loading:                // 리소스 로드 및 스테이지 배치
 
                 stageContainer.SetStage(isRestart);  //  스테이지 정보 저장
 
                 isRestart = false;
 
-                OnFadeInRequest?.Invoke(() => ChangeGameState(eGameState.Loading));
-                break;
-            case eGameState.Loading:        // 리소스 로드 및 스테이지 배치
-
                 ResetObject?.Invoke();
-
 
                 SetStartBox();
 
@@ -221,8 +222,6 @@ public class GameManager : MonoBehaviour
                     return;
                 }
 #endif
-
-                OnBlockInput?.Invoke(true);
                 Result();
                 break;
         }

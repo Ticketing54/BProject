@@ -22,6 +22,7 @@ public class UIManager : MonoBehaviour
 
     private float timer = 0f;
     private Coroutine fadeCoroutine;
+    private Coroutine openResultPage;
 
     private void OnEnable()
     {
@@ -76,10 +77,13 @@ public class UIManager : MonoBehaviour
 
     public void OpenResultPage(bool _isNext)
     {
-        StartCoroutine(CoOpoenScoreUI(_isNext));
+        if (openResultPage != null)
+            return;
+
+        openResultPage = StartCoroutine(CoOpenResultPage(_isNext));
     }
 
-    private IEnumerator CoOpoenScoreUI(bool _isNext)
+    private IEnumerator CoOpenResultPage(bool _isNext)
     {
         next_Button.interactable = _isNext;
         end_CanvasGroup.alpha = 0;
@@ -90,6 +94,8 @@ public class UIManager : MonoBehaviour
             end_CanvasGroup.alpha += Time.deltaTime;
             yield return null;
         }
+
+        openResultPage = null;
     }
 
     #endregion
