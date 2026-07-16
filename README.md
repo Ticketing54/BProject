@@ -1,7 +1,7 @@
 <h1 align="center">CHANGE AND DROP</h1>
 
 
-<h1 align="center"><img width="548" height="391" alt="Animation" src="https://github.com/user-attachments/assets/283b9c9a-240d-4cff-8bca-b3aba19f66c0" /></h1>
+<h1 align="center"><img width="1096" height="782" alt="Animation" src="https://github.com/user-attachments/assets/14caa98d-b3ae-4c52-b100-173c9c8ea056" /></h1>
 
 **한 줄 소개**: 떨어지는 공을 원하는 박스에 떨어뜨려 많은 점수를 내는 게임
 
