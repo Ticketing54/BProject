@@ -11,6 +11,10 @@
 
 **사용 기술**: Unity 2022.3+, URP, C#
 
+**플레이영상 (Youtube)**
+<br>
+https://youtu.be/XfxsCGON0nA
+
 **핵심 목표**: 
 
 1. 떨어지는 공들이 바글바글한 느낌을 살릴것,
@@ -42,10 +46,4 @@ stencil: 충돌게이트가 무한히 회전하는것처럼 표현
 Cinemachine의 Virtual Camera와 Damping을 활용하여 타겟 추적 시 흔들림 없는 부드러운 카메라 이동을 구현
 
 
-**프로젝트 상세**
-<br>
-https://coconut-flat-99f.notion.site/ChangeAndDrop-3490b606d4f48047b202d49d63601b6e
 
-**데모 (Youtube)**
-<br>
-https://youtu.be/XfxsCGON0nA
